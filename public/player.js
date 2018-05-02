@@ -31,4 +31,8 @@ class Player {
         fill(color);
         ellipse(pos.x, pos.y, mass, mass);
     }
+
+    getPos() {
+        return this.pos;
+    }
 }
