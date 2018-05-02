@@ -76,6 +76,7 @@ function keyPressed() {
 	if (keyCode == UP_ARROW) {
 		players[1].applyForce(createVector(0, -100));
 	}
+	return false;
 }
 
 function setup() {
