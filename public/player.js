@@ -37,11 +37,11 @@ class Player {
 
     detectEdges() {
         if (this.pos.y + this.mass/2 + 1 >= (height/2)*this.id) {
-            this.pos.add(this.vel.copy().mult(-1));
+            this.pos.add(createVector(0, (height/2)*this.id - (this.pos.y + this.mass/2)));
             this.vel = createVector(0, 0);
         }
         if (this.pos.y - this.mass/2 <= (height/2)*(this.id - 1)) {
-            this.pos.add(this.vel.copy().mult(-1));
+            this.pos.add(createVector(0, (height/2)*(this.id - 1) - (this.pos.y - this.mass/2)));
             this.vel = createVector(0, 0);
         }
     }
