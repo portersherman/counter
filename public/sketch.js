@@ -11,7 +11,7 @@ function createPlayers() {
 function drawPlayers() {
     players.forEach((pi) => {
         pi.update();
-        pi.detectEdges();
+        pi.detectEdges(0.25);
         pi.display();
     })
 }
