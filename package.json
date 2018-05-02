@@ -1,0 +1,17 @@
+{
+  "name": "final_assignment",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "author": "Porter Sherman",
+  "license": "ISC",
+  "dependencies": {
+    "eslint": "^4.19.1",
+    "express": "^4.16.3",
+    "nodemon": "^1.17.3",
+    "webpack": "^4.6.0"
+  }
+}
