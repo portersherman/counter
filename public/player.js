@@ -25,10 +25,10 @@ class Player {
     }
 
     display() {
-        const {pos, color} = this
+        const {pos, color, mass} = this
 
         noStroke()
         fill(color)
-        ellipse(pos.x, pos.y, 10, 10)
+        ellipse(pos.x, pos.y, mass, mass)
     }
 }
