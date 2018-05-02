@@ -38,9 +38,9 @@ function drawBackground() {
 	rect(0, 0, width, height/2);
 	fill(255, 21, 106);
 	rect(0, height/2, width, height/2);
-	stroke(255);
-	strokeWeight(2);
-	line(0, height/2, width, height/2);
+	// stroke(255);
+	// strokeWeight(2);
+	// line(0, height/2, width, height/2);
 }
 
 function setGradient(x, y, w, h, c1, c2, axis) {

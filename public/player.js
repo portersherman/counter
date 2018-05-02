@@ -28,7 +28,8 @@ class Player {
     display() {
         noStroke();
         fill(this.color);
-        ellipse(this.pos.x, this.pos.y, this.mass, this.mass);
+        rectMode(CENTER);
+        rect(this.pos.x, this.pos.y, this.mass, this.mass);
     }
 
     getPos() {
