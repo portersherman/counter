@@ -10,8 +10,8 @@ function createPlayers() {
 
 function drawPlayers() {
     players.forEach((pi) => {
-        pi.update()
-        pi.display()
+        pi.update();
+        pi.display();
     })
 }
 
@@ -30,7 +30,7 @@ function drawBackground() {
 function setup() {
     createCanvas(windowWidth, windowHeight);
     drawBackground();
-    createPlayers()
+    createPlayers();
 }
 
 function draw() {
