@@ -6,6 +6,7 @@ class Player {
         this.acc = createVector(0, 0);
         this.mass = m;
         this.color = c;
+        this.dampnig = 0.8
     }
 
     static incrementId() {
@@ -20,19 +21,28 @@ class Player {
 
     update() {
         this.vel.add(this.acc.copy());
-        this.pos.add(this.vel.copy());
+        this.pos.add(this.vel.copy().mult(this.damping));
         this.acc.set(0,0);
     }
 
     display() {
-        const {pos, color, mass} = this;
-
         noStroke();
-        fill(color);
-        ellipse(pos.x, pos.y, mass, mass);
+        fill(this.color);
+        ellipse(this.pos.x, this.pos.y, this.mass, this.mass);
     }
 
     getPos() {
         return this.pos;
+    }
+
+    detectEdges() {
+        if (this.pos.y + this.mass/2 + 1 >= (height/2)*this.id) {
+            this.pos.add(this.vel.copy().mult(-1));
+            this.vel = createVector(0, 0);
+        }
+        if (this.pos.y - this.mass/2 <= (height/2)*(this.id - 1)) {
+            this.pos.add(this.vel.copy().mult(-1));
+            this.vel = createVector(0, 0);
+        }
     }
 }
