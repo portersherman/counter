@@ -20,6 +20,18 @@ class Platform {
 		return this.pos.y;
 	}
 
+	getBottomSurface() {
+		return this.pos.y + this.height;
+	}
+
+	getWidth() {
+		return this.width;
+	}
+
+	getPos() {
+		return this.pos;
+	}
+
 	display() {
 		fill(this.color);
 		noStroke();

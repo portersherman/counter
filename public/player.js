@@ -33,6 +33,10 @@ class Player {
         rect(this.pos.x, this.pos.y, this.mass, this.mass);
     }
 
+    getMass() {
+        return this.mass;
+    }
+
     getPos() {
         return this.pos;
     }
@@ -53,18 +57,40 @@ class Player {
         return this.floating;
     }
 
+    setFloating(floating) {
+        this.floating = floating;
+    }
+
     detectEdges(bounce, playerNum) {
         if (this.pos.y + this.mass/2 + 1 >= (height/playerNum)*this.id) {
+            // bottom
             this.pos.add(createVector(0, (height/playerNum)*this.id - (this.pos.y + this.mass/2)));
             this.vel.y *= -bounce;
-            this.floating = false;
+            this.setFloating(false);
         } else
         if (this.pos.y - this.mass/2 <= (height/playerNum)*(this.id - 1)) {
+            // top
             this.pos.add(createVector(0, (height/playerNum)*(this.id - 1) - (this.pos.y - this.mass/2)));
             this.vel.y *= -bounce;
-            this.floating = false;
+            this.setFloating(false);
         } else {
-            this.floating = true;
+            this.setFloating(true);
         }
+    }
+
+    detectCollisions(platforms) {
+        platforms[this.id - 1].forEach((platform) => {
+            if ((this.pos.x < platform.getPos().x + platform.getWidth()) && (this.pos.x > platform.getPos().x)) {
+                if (this.pos.y + this.mass/2 > platform.getSurface() && this.pos.y + this.mass/2 < platform.getBottomSurface()) {
+                    if (this.vel.y > 0) {
+                        this.pos.add(createVector(0, platform.getSurface() - (this.pos.y + this.mass/2)));
+                        this.vel.y *= 0;
+                        this.setFloating(false);
+                    } else {
+                        this.setFloating(true);
+                    }
+                }
+            }
+        });
     }
 }
