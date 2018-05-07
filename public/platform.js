@@ -25,6 +25,10 @@ class Platform {
 		return this.pos.y + this.height;
 	}
 
+	getRightSurface() {
+		return this.pos.x + this.width;
+	}
+
 	getWidth() {
 		return this.width;
 	}

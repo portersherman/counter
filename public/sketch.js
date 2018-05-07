@@ -3,6 +3,15 @@ const X_AXIS = 2
 
 var players = [];
 var platforms = [];
+var leftBuffer;
+
+const DEV_OUTPUT = true;
+
+function devLog(...args) {
+    if (DEV_OUTPUT) {
+        args.forEach((a) => console.log(a));
+    }
+}
 
 function createPlayers() {
   	players[0] = new Player(200, height/4, color(255, 255, 255), 20, 3);
@@ -40,6 +49,17 @@ function createPlatform(playerId, playerNum) {
 			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), newY, newW, 20, color(255), pi.getVel().x));
 		}
 	})
+}
+
+function cullPlatforms() {
+    platforms.forEach((platGroup) => {
+        for (let i = 0; i < platGroup.length; i++) {
+            if (platGroup[i].getRightSurface() < averagePlayerPos(players) - leftBuffer) {
+                devLog('removing', platGroup[i])
+                platGroup.splice(i, 1);
+            }
+        }
+    });
 }
 
 function clamp(x, upper, lower) {
@@ -83,7 +103,7 @@ function setGradient(x, y, w, h, c1, c2, axis) {
       stroke(c);
       line(x, i, x+w, i);
     }
-  }  
+  }
   else if (axis == X_AXIS) {  // Left to right gradient
     for (var i = x; i <= x+w; i++) {
       var inter = map(i, x, x+w, 0, 1);
@@ -115,6 +135,7 @@ function keyPressed() {
 }
 
 function initPlatforms() {
+    leftBuffer = width/5;
 	for (var i = 0; i < players.length; i++) {
 		platforms.push([]);
 	}
@@ -127,13 +148,15 @@ function setup() {
     createPlayers();
     initPlatforms();
     createPlatform();
+
 }
 
 function advance() {
-	translate(-averagePlayerPos(players) + width/5, 0);
+	translate(-averagePlayerPos(players) + leftBuffer, 0);
 }
 
 function draw() {
+    cullPlatforms();
 	drawBackground();
 	applyGravity();
 	createPlatform();
