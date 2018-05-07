@@ -16,13 +16,20 @@ class Player {
         return this.latestId;
     }
 
+    getVel() {
+        return this.vel;
+    }
+
     applyForce(f) {
         this.acc.add(f.copy().div(this.mass));
     }
 
     update() {
+        var dampVel;
         this.vel.add(this.acc.copy());
-        this.pos.add(this.vel.copy().mult(this.damping));
+        dampVel = this.vel.copy();
+        dampVel.y *= this.damping;
+        this.pos.add(dampVel);
         this.acc.set(0,0);
     }
 

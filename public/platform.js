@@ -1,11 +1,12 @@
 class Platform {
-	constructor(x, y, w, h, c) {
+	constructor(x, y, w, h, c, speed) {
 		this.pos = createVector(x, y);
 		this.width = w;
 		this.height = h;
 		this.color = c;
-		this.created = millis();
-		this.randDelay = w*10 + 50;
+		this.created = frameCount;
+		this.randDelay = w / speed + 30;
+		debugger;
 	}
 
 	getTimeCreated() {

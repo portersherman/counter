@@ -1,7 +1,7 @@
 const Y_AXIS = 1
 const X_AXIS = 2
 
-var players = []
+var players = [];
 var platforms = [];
 
 function createPlayers() {
@@ -32,12 +32,12 @@ function createPlatform(playerId, playerNum) {
 		var playerId = pi.getId();
 		var recent = platforms[playerId - 1][platforms[playerId - 1].length - 1];
 		if (!recent) {
-			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), (height / (2 * playerNum)) * (playerId * 2 - 1), 80, 20, color(255)));
-		} else if (millis() > recent.getTimeCreated() + recent.getRandDelay()) {
+			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), (height / (2 * playerNum)) * (playerId * 2 - 1), 80, 20, color(255), pi.getVel().x));
+		} else if (frameCount > recent.getTimeCreated() + recent.getRandDelay()) {
 			var newY = recent.getSurface() + Math.round((Math.random()-0.5)*3)*20;
 			newY = clamp(newY, (height / playerNum) * (playerId) - 100, (height / playerNum) * (playerId - 1) + 200);
 			var newW = Math.random() * 200 + 50;
-			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), newY, newW, 20, color(255)));
+			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), newY, newW, 20, color(255), pi.getVel().x));
 		}
 	})
 }
@@ -103,12 +103,12 @@ function applyGravity() {
 function keyPressed() {
 	if (!players[0].getFloating()) {
 		if (key == "W") {
-			players[0].applyForce(createVector(0, -200));
+			players[0].applyForce(createVector(0, -100));
 		}
 	}
 	if (!players[1].getFloating()) {
 		if (keyCode == UP_ARROW) {
-			players[1].applyForce(createVector(0, -200));
+			players[1].applyForce(createVector(0, -100));
 		}
 	}
 	return false;
@@ -121,6 +121,7 @@ function initPlatforms() {
 }
 
 function setup() {
+	frameRate(60);
     createCanvas(windowWidth, windowHeight);
     drawBackground();
     createPlayers();
