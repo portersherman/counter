@@ -1,8 +1,9 @@
 const Y_AXIS = 1
 const X_AXIS = 2
 
-var players = []
+var players = [];
 var platforms = [];
+var leftBuffer;
 
 const DEV_OUTPUT = true;
 
@@ -53,7 +54,7 @@ function createPlatform(playerId, playerNum) {
 function cullPlatforms() {
     platforms.forEach((platGroup) => {
         for (let i = 0; i < platGroup.length; i++) {
-            if (platGroup[i].getRightSurface() < averagePlayerPos(players) - width/5) {
+            if (platGroup[i].getRightSurface() < averagePlayerPos(players) - leftBuffer) {
                 devLog('removing', platGroup[i])
                 platGroup.splice(i, 1);
             }
@@ -134,6 +135,7 @@ function keyPressed() {
 }
 
 function initPlatforms() {
+    leftBuffer = width/5;
 	for (var i = 0; i < players.length; i++) {
 		platforms.push([]);
 	}
@@ -145,22 +147,14 @@ function setup() {
     createPlayers();
     initPlatforms();
     createPlatform();
-    scrolledX = 0;
+
 }
 
 function advance() {
-    //console.log(-averagePlayerPos(players) + width/5)
-	translate(-averagePlayerPos(players) + width/5, 0);
-    //scrolledX = (-averagePlayerPos(players) + width/5);
+	translate(-averagePlayerPos(players) + leftBuffer, 0);
 }
 
 function draw() {
-    if (random() > 0.995) {
-        var plat = platforms[0];
-        var play = players[0];
-        var dist = averagePlayerPos(players);
-        //debugger;
-    }
     cullPlatforms();
 	drawBackground();
 	applyGravity();
