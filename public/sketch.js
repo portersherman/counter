@@ -16,6 +16,9 @@ function devLog(...args) {
 function createPlayers() {
   	players[0] = new Player(200, height/4, color(255, 255, 255), 20, 3);
   	players[1] = new Player(200, 3*height/4, color(255, 255, 255), 20, 3);
+    players.forEach((pi) => {
+        pi.restart();
+    });
 }
 
 function drawPlayers() {
@@ -125,13 +128,15 @@ var fallForce = 120;
 function keyPressed() {
 	if (!players[0].getFloating()) {
 		if (key == "W") {
-            players[0].jump()
+      players[0].start();
+      players[0].jump();
 			players[0].applyForce(createVector(0, jumpForce));
 		}
 	}
 	if (!players[1].getFloating()) {
 		if (keyCode == UP_ARROW) {
-            players[1].jump()
+      players[1].start();
+      players[1].jump();
 			players[1].applyForce(createVector(0, jumpForce));
 		}
 	}
