@@ -9,8 +9,9 @@ var leftBuffer;
 const DEV_OUTPUT = false;
 
 const PLATFORM_HEIGHT = 20;
-const PLATFORM_WIDTH = 200;
-const HORIZONTAL_SPEED = 6;
+const PLATFORM_WIDTH = 400;
+const PLATFORM_WIDTH_VARIANCE = 100;
+var HORIZONTAL_SPEED = 6;
 const PLATFORM_MARGIN = 100;
 
 
@@ -83,10 +84,13 @@ function createPlatform(playerId, numPlayers) {
             } else if (recent.getSurface() < (height / numPlayers) * (playerId - 1) + PLATFORM_HEIGHT + PLATFORM_MARGIN) {
                 delta = PLATFORM_HEIGHT;
             } else {
-                delta = Math.round((Math.random()-0.5)*3)*PLATFORM_HEIGHT;
+                delta = 0
+                while (delta == 0) {
+                    delta = Math.round((Math.random()-0.5)*3)*PLATFORM_HEIGHT;
+                }
             }
 			var newY = recent.getSurface() + delta;
-			var newW = (Math.random() * PLATFORM_WIDTH) + 50;
+			var newW = (Math.random() * PLATFORM_WIDTH) + PLATFORM_WIDTH_VARIANCE;
 			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), newY, newW, PLATFORM_HEIGHT, getComplement(colors[playerId - 1]), pi.getVel().x));
 		}
 	})
@@ -201,7 +205,7 @@ function initPlatforms() {
 
 function setup() {
 	frameRate(60);
-    colors[0] = color(21, 240, 250);
+    colors[0] = color(48, 255, 223);
     colors[1] = getComplement(colors[0]);
     createCanvas(windowWidth, windowHeight);
     drawBackground();
@@ -218,7 +222,7 @@ function advance() {
 function draw() {
     cullPlatforms();
 	drawBackground();
-    drawScores();
+    // drawScores();
 	applyGravity();
 	createPlatform();
 	push();

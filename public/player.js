@@ -6,7 +6,10 @@ const WAITING = 'state_waiting';
 
 const PLAYER_SIZE = 20;
 
-const filter = new p5.LowPass(400);
+const SCALE = [0, 2, 4, 7, 9]
+const BASE_PITCH = 36;
+
+const filter = new p5.LowPass(600);
 
 class Player {
     constructor(x, y, c, speed) {
@@ -35,6 +38,7 @@ class Player {
         this.osc.setType('saw');
         this.osc.freq(0);
         this.osc.amp(this.env);
+        this.osc.pan((this.id - 1.5)*2);
         this.osc.disconnect();
         this.osc.connect(filter);
         this.osc.start();
@@ -83,7 +87,7 @@ class Player {
         dampVel.y *= this.damping;
         this.pos.add(dampVel);
         this.acc.set(0,0);
-        this.osc.freq(300 + 600 * (1 - (this.pos.y / height)));
+        //this.osc.freq(300 + 600 * (1 - (this.pos.y / height)));
     }
 
     display() {
@@ -207,10 +211,11 @@ class Player {
         this.noteOff();
     }
 
-    land() {
+    land(platform) {
         this.setAnimationState(LANDING);
         this.animationFrame = 0;
-        this.noteOn();
+        var freq = this.calculateFrequency(platform.pos.y);
+        this.noteOn(freq);
     }
 
     fall() {
@@ -219,7 +224,8 @@ class Player {
         this.noteOff();
     }
 
-    noteOn() {
+    noteOn(f) {
+        this.osc.freq(f);
         this.env.triggerAttack();
     }
 
@@ -256,7 +262,7 @@ class Player {
                             this.vel.y *= 0;
                             if (this.canLand()) {
                                 this.score++;
-                                this.land();
+                                this.land(platform);
                                 //console.log(this.id + ": " + this.score);
                             }
                         }
@@ -268,5 +274,21 @@ class Player {
                 this.fall();
             }
         }
+    }
+
+    calculateFrequency(y) {
+        var laneHeight = height / 2;
+        y = Math.round(y) % laneHeight;
+        y = laneHeight - y;
+
+        var steps = Math.floor(laneHeight / PLATFORM_HEIGHT);
+        var note = Math.round(y / steps);
+        //console.log(note);
+
+        // Base note + Octave + Degree
+        var pitch = BASE_PITCH + (Math.floor(note / SCALE.length) * 12) + (SCALE[note % SCALE.length]);
+        console.log(Math.floor(note / SCALE.length))
+        console.log(pitch)
+        return midiToFreq(pitch);
     }
 }
