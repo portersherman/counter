@@ -6,7 +6,6 @@ class Platform {
 		this.color = c;
 		this.created = frameCount;
 		this.randDelay = w / speed + 30;
-		debugger;
 	}
 
 	getTimeCreated() {
