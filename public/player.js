@@ -6,14 +6,26 @@ class Player {
         this.acc = createVector(0, 0);
         this.mass = m;
         this.color = c;
-        this.damping = 0.8
-        this.floating = false
+        this.damping = 0.8;
+        this.floating = false;
+        this.reset = true;
     }
 
     static incrementId() {
-        if (!this.latestId) this.latestId = 1;
+        if (!this.latestId) {
+            this.latestId = 1;
+        }
         else this.latestId++;
         return this.latestId;
+    }
+
+    start() {
+        this.reset = false;
+    }
+
+    restart() {
+        this.reset = true;
+        this.pos.y = (height/this.constructor.latestId)*(this.id - 1) + (height/this.constructor.latestId) / 3;
     }
 
     getVel() {
@@ -26,7 +38,9 @@ class Player {
 
     update() {
         var dampVel;
-        this.vel.add(this.acc.copy());
+        if (!this.reset) {
+            this.vel.add(this.acc.copy());
+        }
         dampVel = this.vel.copy();
         dampVel.y *= this.damping;
         this.pos.add(dampVel);
@@ -68,20 +82,23 @@ class Player {
         this.floating = floating;
     }
 
-    detectEdges(bounce, playerNum) {
-        if (this.pos.y + this.mass/2 + 1 >= (height/playerNum)*this.id) {
+    detectEdges(bounce) {
+        if (this.reset) {
+            this.floating = false;
+        } else if (this.pos.y + this.mass/2 + 1 >= (height/this.constructor.latestId)*this.id) {
             // bottom
-            this.pos.add(createVector(0, (height/playerNum)*this.id - (this.pos.y + this.mass/2)));
+            this.pos.add(createVector(0, (height/this.constructor.latestId)*this.id - (this.pos.y + this.mass/2)));
             this.vel.y *= -bounce;
-            this.setFloating(false);
-        } else
-        if (this.pos.y - this.mass/2 <= (height/playerNum)*(this.id - 1)) {
+            this.floating = false;
+            this.restart();
+        } else if (this.pos.y - this.mass/2 <= (height/this.constructor.latestId)*(this.id - 1)) {
             // top
-            this.pos.add(createVector(0, (height/playerNum)*(this.id - 1) - (this.pos.y - this.mass/2)));
+            this.pos.add(createVector(0, (height/this.constructor.latestId)*(this.id - 1) - (this.pos.y - this.mass/2)));
             this.vel.y *= -bounce;
-            this.setFloating(false);
+            this.floating = false;
+            this.restart();
         } else {
-            this.setFloating(true);
+            this.floating = true;
         }
     }
 
