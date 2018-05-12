@@ -55,7 +55,6 @@ function cullPlatforms() {
     platforms.forEach((platGroup) => {
         for (let i = 0; i < platGroup.length; i++) {
             if (platGroup[i].getRightSurface() < averagePlayerPos(players) - leftBuffer) {
-                devLog('removing', platGroup[i])
                 platGroup.splice(i, 1);
             }
         }
@@ -116,22 +115,41 @@ function setGradient(x, y, w, h, c1, c2, axis) {
 
 function applyGravity() {
 	for (var i = 0; i < players.length; i++) {
-		players[i].applyForce(createVector(0, 3));
+		players[i].applyForce(createVector(0, 10));
 	}
 }
+
+var jumpForce = -300;
+var fallForce = 120;
 
 function keyPressed() {
 	if (!players[0].getFloating()) {
 		if (key == "W") {
-			players[0].applyForce(createVector(0, -100));
+            players[0].jump()
+			players[0].applyForce(createVector(0, jumpForce));
 		}
 	}
 	if (!players[1].getFloating()) {
 		if (keyCode == UP_ARROW) {
-			players[1].applyForce(createVector(0, -100));
+            players[1].jump()
+			players[1].applyForce(createVector(0, jumpForce));
 		}
 	}
 	return false;
+}
+
+function keyReleased() {
+    if (players[0].getFloating() && players[0].vel.y < 0) {
+        if (key == "W") {
+            players[0].applyForce(createVector(0, fallForce));
+        }
+    }
+    if (players[1].getFloating()  && players[1].vel.y < 0) {
+        if (keyCode == UP_ARROW) {
+            players[1].applyForce(createVector(0, fallForce));
+        }
+    }
+    return false;
 }
 
 function initPlatforms() {

@@ -5,9 +5,15 @@ class Player {
         this.vel = createVector(speed, 0);
         this.acc = createVector(0, 0);
         this.mass = m;
+        this.width = m;
+        this.height = m;
         this.color = c;
         this.damping = 0.8
         this.floating = false
+        this.rotateAngle = 0;
+        this.jumping = false;
+        this.landingFrame = 60;
+        this.animationState = 'running';
     }
 
     static incrementId() {
@@ -18,6 +24,10 @@ class Player {
 
     getVel() {
         return this.vel;
+    }
+
+    getAcc() {
+        return this.acc;
     }
 
     applyForce(f) {
@@ -37,7 +47,35 @@ class Player {
         noStroke();
         fill(this.color);
         rectMode(CENTER);
-        rect(this.pos.x, this.pos.y, this.mass, this.mass);
+        push();
+        if (this.floating) {
+            translate(this.pos.x, this.pos.y);
+            rotate(this.rotateAngle);
+            translate(-this.pos.x, -this.pos.y);
+        }
+        if (this.id == 1) {
+            //console.log(this.landingFrame)
+        }
+        var landingLength = 15;
+        if (this.animationState == 'landing') {
+            var shorterHalf = (this.mass/2 * (this.landingFrame/landingLength));
+            this.height = this.mass/2 + shorterHalf;
+            console.log(this.height)
+            rect(this.pos.x, this.pos.y - shorterHalf, this.mass, this.mass/2 + shorterHalf);
+            if (this.landingFrame < landingLength) {
+                this.landingFrame++;
+            } else {
+                this.setAnimationState("running");
+            }
+        } else {
+            rect(this.pos.x, this.pos.y, this.mass, this.mass);
+        }
+
+
+        pop();
+        if (this.floating) {
+            this.rotateAngle += 0.1;
+        }
     }
 
     getMass() {
@@ -68,6 +106,14 @@ class Player {
         this.floating = floating;
     }
 
+    setAnimationState(animationState) {
+        this.animationState = animationState;
+    }
+
+    jump() {
+        this.setAnimationState('floating');
+    }
+
     detectEdges(bounce, playerNum) {
         if (this.pos.y + this.mass/2 + 1 >= (height/playerNum)*this.id) {
             // bottom
@@ -87,14 +133,21 @@ class Player {
 
     detectCollisions(platforms) {
         platforms[this.id - 1].forEach((platform) => {
+            // Check to see if it landed on a platform
             if ((this.pos.x < platform.getPos().x + platform.getWidth()) && (this.pos.x > platform.getPos().x)) {
                 if (this.pos.y + this.mass/2 > platform.getSurface() && this.pos.y + this.mass/2 < platform.getBottomSurface()) {
                     if (this.vel.y > 0) {
-                        this.pos.add(createVector(0, platform.getSurface() - (this.pos.y + this.mass/2)));
+                        this.pos.add(createVector(0, platform.getSurface() - (this.pos.y + this.height/2)));
                         this.vel.y *= 0;
+                        if (this.animationState == 'floating') {
+                            this.setAnimationState("landing");
+                            this.landingFrame = 0;
+                        }
                         this.setFloating(false);
+                        this.rotateAngle = 0;
                     } else {
                         this.setFloating(true);
+                        this.setAnimationState("floating");
                     }
                 }
             }
