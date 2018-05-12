@@ -70,12 +70,12 @@ class Player {
         if (this.id == 1) {
             //console.log(this.landingFrame)
         }
-        var landingLength = 15;
+        var landingLength = 10;
         if (this.animationState == 'landing') {
             var shorterHalf = (this.mass/2 * (this.landingFrame/landingLength));
             this.height = this.mass/2 + shorterHalf;
             console.log(this.height)
-            rect(this.pos.x, this.pos.y - shorterHalf, this.mass, this.mass/2 + shorterHalf);
+            rect(this.pos.x, this.pos.y + (this.mass/2 - shorterHalf)/2, this.mass, this.mass/2 + shorterHalf);
             if (this.landingFrame < landingLength) {
                 this.landingFrame++;
             } else {
@@ -119,7 +119,7 @@ class Player {
     setFloating(floating) {
         this.floating = floating;
     }
-  
+
     setAnimationState(animationState) {
         this.animationState = animationState;
     }
