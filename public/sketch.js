@@ -8,6 +8,12 @@ var leftBuffer;
 
 const DEV_OUTPUT = false;
 
+const PLATFORM_HEIGHT = 20;
+const PLATFORM_WIDTH = 200;
+const HORIZONTAL_SPEED = 6;
+const PLATFORM_MARGIN = 100;
+
+
 function devLog(...args) {
     if (DEV_OUTPUT) {
         args.forEach((a) => console.log(a));
@@ -24,13 +30,13 @@ function getComplement(color) {
     return temprgb;
 }
 
-function createPlayers() {
-  	players[0] = new Player(200, height/4, getComplement(colors[0]), 20, 3);
+function initPlayers() {
+  	players[0] = new Player(200, 0, getComplement(colors[0]), HORIZONTAL_SPEED);
     temprgb=colors[1];
 	temphsv=RGB2HSV(temprgb);
 	temphsv.hue=HueShift(temphsv.hue, 180.0);
     temprgb=HSV2RGB(temphsv);
-  	players[1] = new Player(200, 3*height/4, getComplement(colors[1]), 20, 3);
+  	players[1] = new Player(200, 0, getComplement(colors[1]), HORIZONTAL_SPEED);
     players.forEach((pi) => {
         pi.restart();
     });
@@ -45,6 +51,15 @@ function drawPlayers() {
     });
 }
 
+function drawScores() {
+    players.forEach((pi) => {
+        fill(255);
+        textSize(50);
+        textFont("Courier");
+        text(pi.getScore(), width - 50, (height/players.length)*(pi.getId() - 1) + 65);
+    });
+}
+
 function drawPlatforms() {
     platforms.forEach((platGroup) => {
         platGroup.forEach((plat) => {
@@ -53,20 +68,26 @@ function drawPlatforms() {
     });
 }
 
-var PLATFORM_HEIGHT = 20;
 
-function createPlatform(playerId, playerNum) {
-	var playerNum = players.length
+function createPlatform(playerId, numPlayers) {
+	var numPlayers = players.length
 	players.forEach((pi) => {
 		var playerId = pi.getId();
 		var recent = platforms[playerId - 1][platforms[playerId - 1].length - 1];
 		if (!recent) {
-			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), (height / (2 * playerNum)) * (playerId * 2 - 1), 80, PLATFORM_HEIGHT, color(255), pi.getVel().x));
+			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1), 80, PLATFORM_HEIGHT, getComplement(colors[playerId - 1]), pi.getVel().x));
 		} else if (frameCount > recent.getTimeCreated() + recent.getRandDelay()) {
-			var newY = recent.getSurface() + Math.round((Math.random()-0.5)*3)*20;
-			newY = clamp(newY, (height / playerNum) * (playerId) - 100, (height / playerNum) * (playerId - 1) + 200);
-			var newW = Math.random() * 200 + 50;
-			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), newY, newW, PLATFORM_HEIGHT, color(255), pi.getVel().x));
+            var delta;
+            if (recent.getSurface() > (height / numPlayers) * (playerId) - 2 * PLATFORM_HEIGHT) {
+                delta = -PLATFORM_HEIGHT;
+            } else if (recent.getSurface() < (height / numPlayers) * (playerId - 1) + PLATFORM_HEIGHT + PLATFORM_MARGIN) {
+                delta = PLATFORM_HEIGHT;
+            } else {
+                delta = Math.round((Math.random()-0.5)*3)*PLATFORM_HEIGHT;
+            }
+			var newY = recent.getSurface() + delta;
+			var newW = (Math.random() * PLATFORM_WIDTH) + 50;
+			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), newY, newW, PLATFORM_HEIGHT, getComplement(colors[playerId - 1]), pi.getVel().x));
 		}
 	})
 }
@@ -82,7 +103,6 @@ function cullPlatforms() {
 }
 
 function clamp(x, upper, lower) {
-	// console.log("upper: " + upper + " lower: " + lower + " x: " + x);
 	return (x > upper) ? upper : (x < lower) ? lower : x;
 }
 
@@ -145,15 +165,13 @@ var fallForce = 120;``
 function keyPressed() {
 	if (players[0].canJump()) {
 		if (key == "W") {
-      players[0].start();
-      players[0].jump();
+            players[0].jump();
 			players[0].applyForce(createVector(0, jumpForce));
 		}
 	}
 	if (players[1].canJump()) {
 		if (keyCode == UP_ARROW) {
-      players[1].start();
-      players[1].jump();
+            players[1].jump();
 			players[1].applyForce(createVector(0, jumpForce));
 		}
 	}
@@ -187,7 +205,7 @@ function setup() {
     colors[1] = getComplement(colors[0]);
     createCanvas(windowWidth, windowHeight);
     drawBackground();
-    createPlayers();
+    initPlayers();
     initPlatforms();
     createPlatform();
 
@@ -200,6 +218,7 @@ function advance() {
 function draw() {
     cullPlatforms();
 	drawBackground();
+    // drawScores();
 	applyGravity();
 	createPlatform();
 	push();

@@ -1,26 +1,27 @@
 const RUNNING = 'state_running';
 const FLOATING = 'state_floating';
 const LANDING = 'state_landing';
-const FALLING = 'state_falling'
+const FALLING = 'state_falling';
+const WAITING = 'state_waiting';
+
+const PLAYER_SIZE = 20;
 
 class Player {
-    constructor(x, y, c, m, speed) {
+    constructor(x, y, c, speed) {
         this.id = Player.incrementId();
         this.pos = createVector(x, y);
         this.vel = createVector(speed, 0);
         this.acc = createVector(0, 0);
-        this.mass = m;
-        this.width = m;
-        this.height = m;
+        this.mass = PLAYER_SIZE;
+        this.width = this.mass;
+        this.height = this.mass;
         this.color = c;
-        this.reset = true;
         this.damping = 0.8
-        this.floating = false
-        this.rotateAngle = 0;
-        this.jumping = false;
-        this.landingFrame = 60;
-        this.animationState = RUNNING;
+        this.animationFrame = 0;
+        this.status = WAITING;
         this.score = 0;
+        this.lives = 5;
+        this.gameOver = false;
     }
 
     static incrementId() {
@@ -31,15 +32,14 @@ class Player {
         return this.latestId;
     }
 
-    start() {
-        this.reset = false;
-        this.score = 0;
-    }
-
     restart() {
-        this.reset = true;
-        this.pos.y = (height/this.constructor.latestId)*(this.id - 1) + (height/this.constructor.latestId) / 3;
-        this.setAnimationState(RUNNING);
+        this.score = 0;
+        this.lives--;
+        if (this.lives <= 0) {
+            this.gameOver = true;
+        }
+        this.pos.y = (height/this.constructor.latestId)*(this.id - 1) + 50;
+        this.setAnimationState(WAITING);
     }
 
     getScore() {
@@ -59,9 +59,8 @@ class Player {
     }
 
     update() {
-
         var dampVel;
-        if (!this.reset) {
+        if (!this.isWaiting()) {
             this.vel.add(this.acc.copy());
         }
         dampVel = this.vel.copy();
@@ -72,39 +71,56 @@ class Player {
 
     display() {
         if (this.id == 1) {
-          //console.log(this.animationState)
+          //console.log(this.status)
         }
 
         noStroke();
         fill(this.color);
         rectMode(CENTER);
+
+        // push state to drawer
         push();
+
         if (this.isFloating()) {
             translate(this.pos.x, this.pos.y);
-            rotate(this.rotateAngle);
+            rotate(this.animationFrame / 10);
             translate(-this.pos.x, -this.pos.y);
         }
-        if (this.id == 1) {
-            //console.log(this.landingFrame)
-        }
-        var landingLength = 10;
-        if (this.animationState == LANDING) {
-            var shorterHalf = (this.mass/2 * (this.landingFrame/landingLength));
-            this.height = this.mass/2 + shorterHalf;
-            rect(this.pos.x, this.pos.y + (this.mass/2 - shorterHalf)/2, this.mass, this.mass/2 + shorterHalf);
-            if (this.landingFrame < landingLength) {
-                this.landingFrame++;
-            } else {
-                this.setAnimationState(RUNNING);
-            }
-        } else {
-            rect(this.pos.x, this.pos.y, this.mass, this.mass);
-        }
 
+        var landingLength = 10;
+        switch(this.status) {
+            case LANDING:
+                var shorterHalf = (this.mass/2 * (this.animationFrame/(landingLength)));
+                this.height = this.mass/2 + shorterHalf;
+                rect(this.pos.x, this.pos.y - this.mass/2 + (this.mass/2 - shorterHalf)/2, this.mass, this.mass/2 + shorterHalf);
+                if (this.animationFrame < landingLength) {
+                    this.animationFrame++;
+                } else {
+                    this.setAnimationState(RUNNING);
+                }
+                break;
+            case WAITING:
+                if ((frameCount % 60) < 30) {
+                    noFill()
+                    stroke(this.color);
+                    strokeWeight(2);
+                } else {
+                    fill(this.color);
+                    noStroke();
+                }
+                rect(this.pos.x, this.pos.y, this.mass, this.mass);
+                break;
+            case RUNNING:
+                rect(this.pos.x, this.pos.y - this.mass/2, this.mass, this.mass);
+                break;
+            default:
+                rect(this.pos.x, this.pos.y, this.mass, this.mass);
+                break;
+        }
 
         pop();
         if (this.isFloating()) {
-            this.rotateAngle += 0.1;
+            this.animationFrame++;
         }
     }
 
@@ -129,77 +145,94 @@ class Player {
     }
 
     isFloating() {
-      return this.animationState == FLOATING;
+      return this.status == FLOATING;
     }
 
     isRunning() {
-      return this.animationState == RUNNING;
+      return this.status == RUNNING;
     }
 
     isLanding() {
-      return this.animationState == LANDING;
+      return this.status == LANDING;
+    }
+
+    isFalling() {
+      return this.status == FALLING;
+    }
+
+    isWaiting() {
+      return this.status == WAITING;
     }
 
     canJump() {
-      return (this.animationState == RUNNING || this.animationState == LANDING);
+      return (
+          this.isRunning() ||
+          this.isLanding() ||
+          this.isWaiting()
+      );
+    }
+
+    canLand() {
+        return (this.isFloating() || this.isFalling());
     }
 
     getAnimationState() {
-        return this.animationState;
+        return this.status;
     }
 
-    setAnimationState(animationState) {
-        this.animationState = animationState;
+    setAnimationState(status) {
+        this.status = status;
     }
 
     jump() {
         this.setAnimationState(FLOATING);
-        this.rotateAngle = 0;
+        this.animationFrame = 0;
     }
 
     land() {
         this.setAnimationState(LANDING);
-        this.landingFrame = 0;
+        this.animationFrame = 0;
     }
 
     detectEdges(bounce) {
-        if (this.reset) {
-            this.setAnimationState(RUNNING);
+        if (this.isWaiting()) {
+            this.setAnimationState(WAITING);
         } else if (this.pos.y + this.mass/2 + 1 >= (height/this.constructor.latestId)*this.id) {
             // bottom
             this.pos.add(createVector(0, (height/this.constructor.latestId)*this.id - (this.pos.y + this.mass/2)));
             this.vel.y *= -bounce;
             this.restart();
         } else if (this.pos.y - this.mass/2 <= (height/this.constructor.latestId)*(this.id - 1)) {
-            // top
-            this.pos.add(createVector(0, (height/this.constructor.latestId)*(this.id - 1) - (this.pos.y - this.mass/2)));
-            this.vel.y *= -bounce;
+            // top (don't bounce off the top, hide)
+            // this.pos.add(createVector(0, (height/this.constructor.latestId)*(this.id - 1) - (this.pos.y - this.mass/2)));
+            // this.vel.y *= -bounce;
         }
     }
 
     detectCollisions(platforms) {
-        if (this.reset) {
-            this.setAnimationState(RUNNING);
-        } else {
+        if (!this.isWaiting()) {
+            var landed = false;
             platforms[this.id - 1].forEach((platform) => {
                 // Check to see if it landed on a platform
                 if (this.pos.y + this.mass/2 > platform.getSurface() && this.pos.y + this.mass/2 < platform.getBottomSurface()) {
                     if ((this.pos.x - this.mass/2 < platform.getPos().x + platform.getWidth()) && (this.pos.x + this.mass/2 > platform.getPos().x)) {
                         if (this.vel.y > 0) {
-                            this.pos.add(createVector(0, platform.getSurface() - (this.pos.y + this.height/2)));
+                            landed = true;
+                            this.pos.add(createVector(0, platform.getSurface() - (this.pos.y)));
                             this.vel.y *= 0;
-                            if (this.isFloating()) {
+                            if (this.canLand()) {
                                 this.score++;
                                 this.land();
+                                //console.log(this.id + ": " + this.score);
                             }
-                            this.rotateAngle = 0;
                         }
-                    } else if (this.isRunning()) {
-                        console.log('fell')
-                        this.setAnimationState(FALLING);
                     }
                 }
             });
+            if (this.isRunning() && !landed) {
+                console.log('ouch!')
+                this.setAnimationState(FALLING);
+            }
         }
     }
 }

@@ -37,8 +37,11 @@ class Platform {
 	}
 
 	display() {
-		fill(this.color);
+		// fill(this.color);
+		// stroke(255);
+		// strokeWeight(3);
 		noStroke();
+		fill(this.color);
 		rectMode(CORNER);
 		rect(this.pos.x, this.pos.y, this.width, this.height);
 	}
