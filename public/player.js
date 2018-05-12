@@ -6,6 +6,8 @@ const WAITING = 'state_waiting';
 
 const PLAYER_SIZE = 20;
 
+const filter = new p5.LowPass(400);
+
 class Player {
     constructor(x, y, c, speed) {
         this.id = Player.incrementId();
@@ -22,6 +24,20 @@ class Player {
         this.score = 0;
         this.lives = 5;
         this.gameOver = false;
+        this.setupSound();
+    }
+
+    setupSound() {
+        this.env = new p5.Env();
+        this.env.setADSR(0.5, 0.125, 0.4, 0.5);
+        this.env.setRange(0.5, 0);
+        this.osc = new p5.Oscillator();
+        this.osc.setType('saw');
+        this.osc.freq(0);
+        this.osc.amp(this.env);
+        this.osc.disconnect();
+        this.osc.connect(filter);
+        this.osc.start();
     }
 
     static incrementId() {
@@ -67,6 +83,7 @@ class Player {
         dampVel.y *= this.damping;
         this.pos.add(dampVel);
         this.acc.set(0,0);
+        this.osc.freq(300 + 600 * (1 - (this.pos.y / height)));
     }
 
     display() {
@@ -187,12 +204,29 @@ class Player {
     jump() {
         this.setAnimationState(FLOATING);
         this.animationFrame = 0;
+        this.noteOff();
     }
 
     land() {
         this.setAnimationState(LANDING);
         this.animationFrame = 0;
+        this.noteOn();
     }
+
+    fall() {
+        this.setAnimationState(FALLING);
+        this.animationFrame = 0;
+        this.noteOff();
+    }
+
+    noteOn() {
+        this.env.triggerAttack();
+    }
+
+    noteOff() {
+        this.env.triggerRelease();
+    }
+
 
     detectEdges(bounce) {
         if (this.isWaiting()) {
@@ -231,7 +265,7 @@ class Player {
             });
             if (this.isRunning() && !landed) {
                 console.log('ouch!')
-                this.setAnimationState(FALLING);
+                this.fall();
             }
         }
     }

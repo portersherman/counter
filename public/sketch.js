@@ -218,7 +218,7 @@ function advance() {
 function draw() {
     cullPlatforms();
 	drawBackground();
-    // drawScores();
+    drawScores();
 	applyGravity();
 	createPlatform();
 	push();
