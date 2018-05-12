@@ -1,3 +1,8 @@
+const RUNNING = 'state_running';
+const FLOATING = 'state_floating';
+const LANDING = 'state_landing';
+const FALLING = 'state_falling'
+
 class Player {
     constructor(x, y, c, m, speed) {
         this.id = Player.incrementId();
@@ -14,7 +19,8 @@ class Player {
         this.rotateAngle = 0;
         this.jumping = false;
         this.landingFrame = 60;
-        this.animationState = 'running';
+        this.animationState = RUNNING;
+        this.score = 0;
     }
 
     static incrementId() {
@@ -27,11 +33,17 @@ class Player {
 
     start() {
         this.reset = false;
+        this.score = 0;
     }
 
     restart() {
         this.reset = true;
         this.pos.y = (height/this.constructor.latestId)*(this.id - 1) + (height/this.constructor.latestId) / 3;
+        this.setAnimationState(RUNNING);
+    }
+
+    getScore() {
+        return this.score;
     }
 
     getVel() {
@@ -47,6 +59,7 @@ class Player {
     }
 
     update() {
+
         var dampVel;
         if (!this.reset) {
             this.vel.add(this.acc.copy());
@@ -58,11 +71,15 @@ class Player {
     }
 
     display() {
+        if (this.id == 1) {
+          //console.log(this.animationState)
+        }
+
         noStroke();
         fill(this.color);
         rectMode(CENTER);
         push();
-        if (this.floating) {
+        if (this.isFloating()) {
             translate(this.pos.x, this.pos.y);
             rotate(this.rotateAngle);
             translate(-this.pos.x, -this.pos.y);
@@ -71,15 +88,14 @@ class Player {
             //console.log(this.landingFrame)
         }
         var landingLength = 10;
-        if (this.animationState == 'landing') {
+        if (this.animationState == LANDING) {
             var shorterHalf = (this.mass/2 * (this.landingFrame/landingLength));
             this.height = this.mass/2 + shorterHalf;
-            console.log(this.height)
             rect(this.pos.x, this.pos.y + (this.mass/2 - shorterHalf)/2, this.mass, this.mass/2 + shorterHalf);
             if (this.landingFrame < landingLength) {
                 this.landingFrame++;
             } else {
-                this.setAnimationState("running");
+                this.setAnimationState(RUNNING);
             }
         } else {
             rect(this.pos.x, this.pos.y, this.mass, this.mass);
@@ -87,7 +103,7 @@ class Player {
 
 
         pop();
-        if (this.floating) {
+        if (this.isFloating()) {
             this.rotateAngle += 0.1;
         }
     }
@@ -112,12 +128,24 @@ class Player {
         return this.vel;
     }
 
-    getFloating() {
-        return this.floating;
+    isFloating() {
+      return this.animationState == FLOATING;
     }
 
-    setFloating(floating) {
-        this.floating = floating;
+    isRunning() {
+      return this.animationState == RUNNING;
+    }
+
+    isLanding() {
+      return this.animationState == LANDING;
+    }
+
+    canJump() {
+      return (this.animationState == RUNNING || this.animationState == LANDING);
+    }
+
+    getAnimationState() {
+        return this.animationState;
     }
 
     setAnimationState(animationState) {
@@ -125,49 +153,53 @@ class Player {
     }
 
     jump() {
-        this.setAnimationState('floating');
+        this.setAnimationState(FLOATING);
+        this.rotateAngle = 0;
+    }
+
+    land() {
+        this.setAnimationState(LANDING);
+        this.landingFrame = 0;
     }
 
     detectEdges(bounce) {
         if (this.reset) {
-            this.floating = false;
+            this.setAnimationState(RUNNING);
         } else if (this.pos.y + this.mass/2 + 1 >= (height/this.constructor.latestId)*this.id) {
             // bottom
             this.pos.add(createVector(0, (height/this.constructor.latestId)*this.id - (this.pos.y + this.mass/2)));
             this.vel.y *= -bounce;
-            this.floating = false;
             this.restart();
         } else if (this.pos.y - this.mass/2 <= (height/this.constructor.latestId)*(this.id - 1)) {
             // top
             this.pos.add(createVector(0, (height/this.constructor.latestId)*(this.id - 1) - (this.pos.y - this.mass/2)));
             this.vel.y *= -bounce;
-            this.floating = false;
-            this.restart();
-        } else {
-            this.floating = true;
         }
     }
 
     detectCollisions(platforms) {
-        platforms[this.id - 1].forEach((platform) => {
-            // Check to see if it landed on a platform
-            if ((this.pos.x < platform.getPos().x + platform.getWidth()) && (this.pos.x > platform.getPos().x)) {
+        if (this.reset) {
+            this.setAnimationState(RUNNING);
+        } else {
+            platforms[this.id - 1].forEach((platform) => {
+                // Check to see if it landed on a platform
                 if (this.pos.y + this.mass/2 > platform.getSurface() && this.pos.y + this.mass/2 < platform.getBottomSurface()) {
-                    if (this.vel.y > 0) {
-                        this.pos.add(createVector(0, platform.getSurface() - (this.pos.y + this.height/2)));
-                        this.vel.y *= 0;
-                        if (this.animationState == 'floating') {
-                            this.setAnimationState("landing");
-                            this.landingFrame = 0;
+                    if ((this.pos.x - this.mass/2 < platform.getPos().x + platform.getWidth()) && (this.pos.x + this.mass/2 > platform.getPos().x)) {
+                        if (this.vel.y > 0) {
+                            this.pos.add(createVector(0, platform.getSurface() - (this.pos.y + this.height/2)));
+                            this.vel.y *= 0;
+                            if (this.isFloating()) {
+                                this.score++;
+                                this.land();
+                            }
+                            this.rotateAngle = 0;
                         }
-                        this.setFloating(false);
-                        this.rotateAngle = 0;
-                    } else {
-                        this.setFloating(true);
-                        this.setAnimationState("floating");
+                    } else if (this.isRunning()) {
+                        console.log('fell')
+                        this.setAnimationState(FALLING);
                     }
                 }
-            }
-        });
+            });
+        }
     }
 }
