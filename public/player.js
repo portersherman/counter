@@ -161,6 +161,9 @@ class Player {
             case RUNNING:
                 rect(this.pos.x, this.pos.y - this.mass/2, this.mass, this.mass);
                 break;
+            case FALLING:
+                rect(this.pos.x, this.pos.y - this.mass/2, this.mass, this.mass);
+                break;
             default:
                 rect(this.pos.x, this.pos.y, this.mass, this.mass);
                 break;
