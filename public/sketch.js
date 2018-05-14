@@ -13,6 +13,7 @@ const PLATFORM_WIDTH = 400;
 const PLATFORM_WIDTH_VARIANCE = 100;
 var HORIZONTAL_SPEED = 6;
 const PLATFORM_MARGIN = 100;
+const GRAVITY = 12;
 
 
 function devLog(...args) {
@@ -159,42 +160,60 @@ function setGradient(x, y, w, h, c1, c2, axis) {
 
 function applyGravity() {
 	for (var i = 0; i < players.length; i++) {
-		players[i].applyForce(createVector(0, 10));
+		players[i].applyForce(createVector(0, GRAVITY));
 	}
 }
 
 var jumpForce = -300;
-var fallForce = 120;``
+var jumpVel = -14.4
+var fallForce = 60;
 
 function keyPressed() {
 	if (players[0].canJump()) {
 		if (key == "W") {
             players[0].jump();
 			players[0].applyForce(createVector(0, jumpForce));
+            return false;
 		}
 	}
 	if (players[1].canJump()) {
 		if (keyCode == UP_ARROW) {
             players[1].jump();
 			players[1].applyForce(createVector(0, jumpForce));
+            return false;
 		}
 	}
-	return false;
+    if (key == "A") {
+        players[0].switchClass();
+        return false;
+    }
+    if (keyCode == LEFT_ARROW) {
+        players[1].switchClass();
+        return false;
+    }
+    if (key == "D") {
+        players[0].switchClass();
+        return false;
+    }
+    if (keyCode == RIGHT_ARROW) {
+        players[1].switchClass();
+        return false;
+    }
 }
 
-function keyReleased() {
-    if (players[0].isFloating() && players[0].vel.y < -3) {
-        if (key == "W") {
-            players[0].applyForce(createVector(0, fallForce));
-        }
-    }
-    if (players[1].isFloating() && players[1].vel.y < -3) {
-        if (keyCode == UP_ARROW) {
-            players[1].applyForce(createVector(0, fallForce));
-        }
-    }
-    return false;
-}
+// function keyReleased() {
+//     if (players[0].isFloating() && players[0].vel.y < -3) {
+//         if (key == "W") {
+//             players[0].applyForce(createVector(0, fallForce));
+//         }
+//     }
+//     if (players[1].isFloating() && players[1].vel.y < -3) {
+//         if (keyCode == UP_ARROW) {
+//             players[1].applyForce(createVector(0, fallForce));
+//         }
+//     }
+//     return false;
+// }
 
 function initPlatforms() {
     leftBuffer = width/5;
