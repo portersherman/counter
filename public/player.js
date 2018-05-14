@@ -108,6 +108,7 @@ class Player {
         }
         dampVel = this.vel.copy();
         dampVel.y *= this.damping;
+        console.log(this.vel.y);
         this.pos.add(dampVel);
         this.acc.set(0,0);
         //this.osc.freq(300 + 600 * (1 - (this.pos.y / height)));
@@ -131,7 +132,7 @@ class Player {
         if (this.isFloating()) {
             translate(this.pos.x, this.pos.y);
             rotate(this.animationFrame / 10);
-            scale(1 + this.animationFrame / 100 / (1 + Math.abs(this.vel.y) / 20));
+            scale(1 + clamp(Math.abs(jumpVel) - Math.abs(this.vel.y), Math.abs(jumpVel), 0) / 10);
             translate(-this.pos.x, -this.pos.y);
         }
 
