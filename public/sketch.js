@@ -171,15 +171,32 @@ function keyPressed() {
 		if (key == "W") {
             players[0].jump();
 			players[0].applyForce(createVector(0, jumpForce));
+            return false;
 		}
 	}
 	if (players[1].canJump()) {
 		if (keyCode == UP_ARROW) {
             players[1].jump();
 			players[1].applyForce(createVector(0, jumpForce));
+            return false;
 		}
 	}
-	return false;
+    if (key == "A") {
+        players[0].switchClass();
+        return false;
+    }
+    if (keyCode == LEFT_ARROW) {
+        players[1].switchClass();
+        return false;
+    }
+    if (key == "D") {
+        players[0].switchClass();
+        return false;
+    }
+    if (keyCode == RIGHT_ARROW) {
+        players[1].switchClass();
+        return false;
+    }
 }
 
 function keyReleased() {
