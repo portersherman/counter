@@ -13,6 +13,7 @@ const PLATFORM_WIDTH = 400;
 const PLATFORM_WIDTH_VARIANCE = 100;
 var HORIZONTAL_SPEED = 6;
 const PLATFORM_MARGIN = 100;
+const GRAVITY = 12;
 
 
 function devLog(...args) {
@@ -159,12 +160,12 @@ function setGradient(x, y, w, h, c1, c2, axis) {
 
 function applyGravity() {
 	for (var i = 0; i < players.length; i++) {
-		players[i].applyForce(createVector(0, 10));
+		players[i].applyForce(createVector(0, GRAVITY));
 	}
 }
 
 var jumpForce = -300;
-var fallForce = 120;``
+var fallForce = 60;``
 
 function keyPressed() {
 	if (players[0].canJump()) {

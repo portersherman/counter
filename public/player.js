@@ -36,7 +36,7 @@ class Player {
 
     setupSound() {
         this.env = new p5.Env();
-        this.env.setADSR(0.125, 0.125, 0.2, 0.75);
+        this.env.setADSR(0.125, 0.125, 0.2, 0.5);
         this.env.setRange(0.4, 0);
 
         this.osc = new p5.Oscillator();
@@ -131,6 +131,7 @@ class Player {
         if (this.isFloating()) {
             translate(this.pos.x, this.pos.y);
             rotate(this.animationFrame / 10);
+            scale(1 + this.animationFrame / 100 / (1 + Math.abs(this.vel.y) / 20));
             translate(-this.pos.x, -this.pos.y);
         }
 
@@ -252,8 +253,8 @@ class Player {
 
     noteOn(f) {
         this.osc.freq(f);
-        this.lOsc.freq(f+3);
-        this.lOsc.freq(f-3);
+        this.lOsc.freq(f+1.5);
+        this.lOsc.freq(f-1.5);
         this.subOsc.freq(f/2);
         this.env.triggerAttack();
     }
