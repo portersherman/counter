@@ -1,20 +1,47 @@
+const RUNNING = 'state_running';
+const FLOATING = 'state_floating';
+const LANDING = 'state_landing';
+const FALLING = 'state_falling';
+const WAITING = 'state_waiting';
+
+const PLAYER_SIZE = 20;
+
+const SCALE = [0, 2, 4, 7, 9]
+const BASE_PITCH = 36;
+
+const filter = new p5.LowPass(600);
+
 class Player {
-    constructor(x, y, c, m, speed) {
+    constructor(x, y, c, speed) {
         this.id = Player.incrementId();
         this.pos = createVector(x, y);
         this.vel = createVector(speed, 0);
         this.acc = createVector(0, 0);
-        this.mass = m;
-        this.width = m;
-        this.height = m;
+        this.mass = PLAYER_SIZE;
+        this.width = this.mass;
+        this.height = this.mass;
         this.color = c;
-        this.reset = true;
         this.damping = 0.8
-        this.floating = false
-        this.rotateAngle = 0;
-        this.jumping = false;
-        this.landingFrame = 60;
-        this.animationState = 'running';
+        this.animationFrame = 0;
+        this.status = WAITING;
+        this.score = 0;
+        this.lives = 5;
+        this.gameOver = false;
+        this.setupSound();
+    }
+
+    setupSound() {
+        this.env = new p5.Env();
+        this.env.setADSR(0.5, 0.125, 0.4, 0.5);
+        this.env.setRange(0.5, 0);
+        this.osc = new p5.Oscillator();
+        this.osc.setType('saw');
+        this.osc.freq(0);
+        this.osc.amp(this.env);
+        this.osc.pan((this.id - 1.5)*2);
+        this.osc.disconnect();
+        this.osc.connect(filter);
+        this.osc.start();
     }
 
     static incrementId() {
@@ -25,13 +52,18 @@ class Player {
         return this.latestId;
     }
 
-    start() {
-        this.reset = false;
+    restart() {
+        this.score = 0;
+        this.lives--;
+        if (this.lives <= 0) {
+            this.gameOver = true;
+        }
+        this.pos.y = (height/this.constructor.latestId)*(this.id - 1) + 50;
+        this.setAnimationState(WAITING);
     }
 
-    restart() {
-        this.reset = true;
-        this.pos.y = (height/this.constructor.latestId)*(this.id - 1) + (height/this.constructor.latestId) / 3;
+    getScore() {
+        return this.score;
     }
 
     getVel() {
@@ -48,47 +80,68 @@ class Player {
 
     update() {
         var dampVel;
-        if (!this.reset) {
+        if (!this.isWaiting()) {
             this.vel.add(this.acc.copy());
         }
         dampVel = this.vel.copy();
         dampVel.y *= this.damping;
         this.pos.add(dampVel);
         this.acc.set(0,0);
+        //this.osc.freq(300 + 600 * (1 - (this.pos.y / height)));
     }
 
     display() {
+        if (this.id == 1) {
+          //console.log(this.status)
+        }
+
         noStroke();
         fill(this.color);
         rectMode(CENTER);
+
+        // push state to drawer
         push();
-        if (this.floating) {
+
+        if (this.isFloating()) {
             translate(this.pos.x, this.pos.y);
-            rotate(this.rotateAngle);
+            rotate(this.animationFrame / 10);
             translate(-this.pos.x, -this.pos.y);
         }
-        if (this.id == 1) {
-            //console.log(this.landingFrame)
-        }
-        var landingLength = 15;
-        if (this.animationState == 'landing') {
-            var shorterHalf = (this.mass/2 * (this.landingFrame/landingLength));
-            this.height = this.mass/2 + shorterHalf;
-            console.log(this.height)
-            rect(this.pos.x, this.pos.y - shorterHalf, this.mass, this.mass/2 + shorterHalf);
-            if (this.landingFrame < landingLength) {
-                this.landingFrame++;
-            } else {
-                this.setAnimationState("running");
-            }
-        } else {
-            rect(this.pos.x, this.pos.y, this.mass, this.mass);
-        }
 
+        var landingLength = 10;
+        switch(this.status) {
+            case LANDING:
+                var shorterHalf = (this.mass/2 * (this.animationFrame/(landingLength)));
+                this.height = this.mass/2 + shorterHalf;
+                rect(this.pos.x, this.pos.y - this.mass/2 + (this.mass/2 - shorterHalf)/2, this.mass, this.mass/2 + shorterHalf);
+                if (this.animationFrame < landingLength) {
+                    this.animationFrame++;
+                } else {
+                    this.setAnimationState(RUNNING);
+                }
+                break;
+            case WAITING:
+                if ((frameCount % 60) < 30) {
+                    noFill()
+                    stroke(this.color);
+                    strokeWeight(2);
+                } else {
+                    fill(this.color);
+                    noStroke();
+                }
+                rect(this.pos.x, this.pos.y, this.mass, this.mass);
+                break;
+            case RUNNING:
+                rect(this.pos.x, this.pos.y - this.mass/2, this.mass, this.mass);
+                break;
+            default:
+                rect(this.pos.x, this.pos.y, this.mass, this.mass);
+                break;
+        }
 
         pop();
-        if (this.floating) {
-            this.rotateAngle += 0.1;
+        if (this.isFloating()) {
+            this.animationFrame++;
         }
     }
 
@@ -112,62 +165,130 @@ class Player {
         return this.vel;
     }
 
-    getFloating() {
-        return this.floating;
+    isFloating() {
+      return this.status == FLOATING;
     }
 
-    setFloating(floating) {
-        this.floating = floating;
+    isRunning() {
+      return this.status == RUNNING;
     }
-  
-    setAnimationState(animationState) {
-        this.animationState = animationState;
+
+    isLanding() {
+      return this.status == LANDING;
+    }
+
+    isFalling() {
+      return this.status == FALLING;
+    }
+
+    isWaiting() {
+      return this.status == WAITING;
+    }
+
+    canJump() {
+      return (
+          this.isRunning() ||
+          this.isLanding() ||
+          this.isWaiting()
+      );
+    }
+
+    canLand() {
+        return (this.isFloating() || this.isFalling());
+    }
+
+    getAnimationState() {
+        return this.status;
+    }
+
+    setAnimationState(status) {
+        this.status = status;
     }
 
     jump() {
-        this.setAnimationState('floating');
+        this.setAnimationState(FLOATING);
+        this.animationFrame = 0;
+        this.noteOff();
     }
 
+    land(platform) {
+        this.setAnimationState(LANDING);
+        this.animationFrame = 0;
+        var freq = this.calculateFrequency(platform.pos.y);
+        this.noteOn(freq);
+    }
+
+    fall() {
+        this.setAnimationState(FALLING);
+        this.animationFrame = 0;
+        this.noteOff();
+    }
+
+    noteOn(f) {
+        this.osc.freq(f);
+        this.env.triggerAttack();
+    }
+
+    noteOff() {
+        this.env.triggerRelease();
+    }
+
+
     detectEdges(bounce) {
-        if (this.reset) {
-            this.floating = false;
+        if (this.isWaiting()) {
+            this.setAnimationState(WAITING);
         } else if (this.pos.y + this.mass/2 + 1 >= (height/this.constructor.latestId)*this.id) {
             // bottom
             this.pos.add(createVector(0, (height/this.constructor.latestId)*this.id - (this.pos.y + this.mass/2)));
             this.vel.y *= -bounce;
-            this.floating = false;
             this.restart();
         } else if (this.pos.y - this.mass/2 <= (height/this.constructor.latestId)*(this.id - 1)) {
-            // top
-            this.pos.add(createVector(0, (height/this.constructor.latestId)*(this.id - 1) - (this.pos.y - this.mass/2)));
-            this.vel.y *= -bounce;
-            this.floating = false;
-            this.restart();
-        } else {
-            this.floating = true;
+            // top (don't bounce off the top, hide)
+            // this.pos.add(createVector(0, (height/this.constructor.latestId)*(this.id - 1) - (this.pos.y - this.mass/2)));
+            // this.vel.y *= -bounce;
         }
     }
 
     detectCollisions(platforms) {
-        platforms[this.id - 1].forEach((platform) => {
-            // Check to see if it landed on a platform
-            if ((this.pos.x < platform.getPos().x + platform.getWidth()) && (this.pos.x > platform.getPos().x)) {
+        if (!this.isWaiting()) {
+            var landed = false;
+            platforms[this.id - 1].forEach((platform) => {
+                // Check to see if it landed on a platform
                 if (this.pos.y + this.mass/2 > platform.getSurface() && this.pos.y + this.mass/2 < platform.getBottomSurface()) {
-                    if (this.vel.y > 0) {
-                        this.pos.add(createVector(0, platform.getSurface() - (this.pos.y + this.height/2)));
-                        this.vel.y *= 0;
-                        if (this.animationState == 'floating') {
-                            this.setAnimationState("landing");
-                            this.landingFrame = 0;
+                    if ((this.pos.x - this.mass/2 < platform.getPos().x + platform.getWidth()) && (this.pos.x + this.mass/2 > platform.getPos().x)) {
+                        if (this.vel.y > 0) {
+                            landed = true;
+                            this.pos.add(createVector(0, platform.getSurface() - (this.pos.y)));
+                            this.vel.y *= 0;
+                            if (this.canLand()) {
+                                this.score++;
+                                this.land(platform);
+                                //console.log(this.id + ": " + this.score);
+                            }
                         }
-                        this.setFloating(false);
-                        this.rotateAngle = 0;
-                    } else {
-                        this.setFloating(true);
-                        this.setAnimationState("floating");
                     }
                 }
+            });
+            if (this.isRunning() && !landed) {
+                console.log('ouch!')
+                this.fall();
             }
-        });
+        }
+    }
+
+    calculateFrequency(y) {
+        var laneHeight = height / 2;
+        y = Math.round(y) % laneHeight;
+        y = laneHeight - y;
+
+        var steps = Math.floor(laneHeight / PLATFORM_HEIGHT);
+        var note = Math.round(y / steps);
+        //console.log(note);
+
+        // Base note + Octave + Degree
+        var pitch = BASE_PITCH + (Math.floor(note / SCALE.length) * 12) + (SCALE[note % SCALE.length]);
+        console.log(Math.floor(note / SCALE.length))
+        console.log(pitch)
+        return midiToFreq(pitch);
     }
 }
