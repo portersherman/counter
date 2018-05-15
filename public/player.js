@@ -34,6 +34,7 @@ class Player {
         this.class = MAJPENT;
         this.setupSound();
         this.trail = new ParticleSystem(5, this.pos.x, this.pos.y, 40);
+        this.displayParticles = false;
     }
 
     setupSound() {
@@ -129,17 +130,25 @@ class Player {
     }
 
     makeTrail() {
-        var vel = this.vel.copy();
-        vel.y *= 0;
-        vel.y -= (Math.random()*1.5);
-        if (frameCount % 2 == 0) {
-            this.trail.pushParticles(4, this.pos.x - this.mass/2, this.pos.y, vel, false);
+        if (this.displayParticles) {
+            var vel = this.vel.copy();
+            vel.y *= 0;
+            vel.y -= (Math.random()*1.5);
+            if (frameCount % 2 == 0) {
+                this.trail.pushParticles(4, this.pos.x - this.mass/2, this.pos.y, vel, false);
+            }
         }
     }
 
     drawTrail() {
-        this.trail.update();
-        this.trail.display(this.canLand());
+        if (this.displayParticles) {
+            this.trail.update();
+            this.trail.display(this.canLand());
+        }
+    }
+
+    toggleParticles() {
+        this.displayParticles = !this.displayParticles;
     }
 
     display() {

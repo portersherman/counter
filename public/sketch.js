@@ -340,6 +340,34 @@ function updateBackground() {
     }
 }
 
+function toggleParticles() {
+    players.forEach((pi) => {
+        pi.toggleParticles();
+    })
+}
+
+function back() {
+    window.history.back()
+}
+
+function initUserInputs() {
+    backButton = createButton('&#8249;');
+    backButton.position(20, 20);
+    backButton.mousePressed(back);
+
+    var HTML = `<div class="toggle-wrap">
+                  <div class="t">
+                  <input type="checkbox" class="toggle-particles">
+                  </div>
+                  <p class="toggle-label">Toggle Particles</p>
+                </div>`
+
+    particleCheckBox = createDiv(HTML);
+    //particleCheckBox.addClass('toggle-particles')
+    particleCheckBox.position(width - 170, 10);
+    particleCheckBox.changed(toggleParticles);
+}
+
 function setup() {
 	frameRate(60);
     initColors(color(48, 255, 223));
@@ -349,6 +377,7 @@ function setup() {
     initPlatforms();
     initBackground();
     createPlatform();
+    initUserInputs();
 }
 
 function initColors(color) {
