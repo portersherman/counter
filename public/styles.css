@@ -1,0 +1,244 @@
+body {
+    height: 90vh;
+    color: #fff;
+    background: linear-gradient(45deg, #30ffdf, #ff3041, #ff9130);
+    background-size: 800% 800%;
+
+    font-family: 'Open Sans';
+
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    -webkit-animation: Gradient 30s ease infinite;
+    -moz-animation: Gradient 30s ease infinite;
+    animation: Gradient 30s ease infinite;
+}
+
+@-webkit-keyframes Gradient {
+    0% {
+        background-position: 0% 50%
+    }
+    50% {
+        background-position: 100% 50%
+    }
+    100% {
+        background-position: 0% 50%
+    }
+}
+
+@-moz-keyframes Gradient {
+    0% {
+        background-position: 0% 50%
+    }
+    50% {
+        background-position: 100% 50%
+    }
+    100% {
+        background-position: 0% 50%
+    }
+}
+
+@keyframes Gradient {
+    0% {
+        background-position: 0% 50%
+    }
+    50% {
+        background-position: 100% 50%
+    }
+    100% {
+        background-position: 0% 50%
+    }
+}
+
+h1,
+p,
+h6 {
+    text-align: center;
+    right: 0;
+    left: 0;
+}
+
+h1 {
+    font-weight: 400;
+    font-size: 64px;
+}
+h6 {
+    font-weight: 200;
+    font-size: 18px;
+}
+
+.name-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.porter,
+.tom {
+    mix-blend-mode: difference;
+    font-weight: 400;
+    font-size: 24px;
+}
+
+.porter {
+    justify-content: center;
+    flex: 0 0 50%;
+}
+
+.tom {
+  flex: 1;
+}
+
+
+.flexbox-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+  min-height: 24em;
+}
+
+.flexbox-item {
+  max-width: 60%;
+}
+
+.fixed {
+  flex: none;
+  max-width: 50%;
+}
+
+.title-box {
+  width: 100%;
+  padding: 1em;
+}
+
+.justified {
+    text-align: justify;
+}
+
+
+.parallax {
+    /* The image used */
+
+    /* Full height */
+    height: 100%;
+
+    /* Create the parallax scrolling effect */
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.scroll {
+    text-align: center;
+    font-size: 36px;
+    font-weight: 200px;
+    padding-top: 50px;
+}
+
+.chevron::before {
+    border-style: solid;
+    border-width: 0.25em 0.25em 0 0;
+    content: '';
+    display: inline-block;
+    height: 0.45em;
+    left: 0.15em;
+    position: relative;
+    top: 0.15em;
+    transform: rotate(-45deg);
+    vertical-align: top;
+    width: 0.45em;
+}
+
+.chevron.right:before {
+    left: 0;
+    transform: rotate(45deg);
+}
+
+.chevron.bottom:before {
+    top: 0;
+    text-align: center;
+    transform: rotate(135deg);
+}
+
+.chevron.left:before {
+    left: 0.25em;
+    transform: rotate(-135deg);
+}
+
+.btn-container {
+  padding-top: 1em;
+  margin-top: 1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+a.btn {
+  position: relative;
+  width: 200;
+  padding: 0;
+  margin: 10px 20px 10px 10px;
+  font-weight: 400;
+  text-align: center;
+  line-height: 50px;
+  color: #FFF;
+  border-radius: 5px;
+  transition: all 0.2s ;
+  cursor:pointer;
+}
+
+.btnFade:hover {
+  background:  #fff;
+  color:;
+}
+
+.ghost-button-semi-transparent {
+  width: 200px;
+  padding: 8px;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 5px;
+  text-align: center;
+  outline: none;
+  text-decoration: none;
+  transition: background-color 0.2s ease-out,
+              border-color 0.2s ease-out;
+}
+.ghost-button-semi-transparent:hover,
+.ghost-button-semi-transparent:active {
+  background-color: #fff; /* fallback */
+  background-color: rgba(255, 255, 255, 0.4);
+  border-color: #fff; /* fallback */
+  border-color: rgba(255, 255, 255, 0.4);
+  transition: background-color 0.3s ease-in,
+              border-color 0.3s ease-in;
+}
+
+.ghost-button-full-color {
+  width: 200px;
+  padding: 8px;
+  color: #fff;
+  background-color: transparent;
+  border: 2px solid #fff;
+  border-radius: 5px;
+  text-align: center;
+  outline: none;
+  text-decoration: none;
+  transition: color 0.3s ease-out,
+              background-color 0.3s ease-out,
+              border-color 0.3s ease-out;
+}
+.ghost-button-full-color:hover,
+.ghost-button-full-color:active {
+  background-color:  #30ffdf;
+  border-color:  #30ffdf;
+  color: #ff3041;
+  transition: color 0.3s ease-in,
+              background-color 0.3s ease-in,
+              border-color 0.3s ease-in;
+              color 0.3s ease-in,
+}
