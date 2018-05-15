@@ -4,11 +4,12 @@ class Particle {
         this.pos.x += (random() - 0.5) * PLAYER_SIZE;
         // this.pos.x -= PLAYER_SIZE;
         this.vel = vel;
-        this.damping = 0.8;
+        this.damping = 0.9;
         this.deathSound = deathSound;
 
         this.isDeathExplosionParticle = isDeathExplosionParticle;
 
+        this.maxTtl = ttl;
         this.ttl = ttl + (random() - 0.5 ) * 20;
     }
 
@@ -24,15 +25,8 @@ class Particle {
 
     display() {
         push();
-        var size;
-        if (this.isDeathExplosionParticle) {
-            noStroke();
-            size = (Math.random() - 0.5) * 10 + 10;
-        } else {
-            noStroke();
-            size = (Math.random() - 0.5) * 5 + 10;
-        }
-        rect(this.pos.x, this.pos.y, size, size);
+        var size = 25;
+        rect(this.pos.x, this.pos.y, size * (this.ttl/this.maxTtl), size * (this.ttl/this.maxTtl));
         pop();
     }
 
@@ -67,7 +61,7 @@ class ParticleSystem {
         var vel;
         for (var i = 0; i < 60; i++) {
             theta = -(random() * Math.PI)
-            r = random() * 30;
+            r = random() * 10;
             vel = createVector(r * Math.cos(theta), r * Math.sin(theta))
             this.particles.push(new Particle(pos.x, pos.y, vel, 60, true));
 
@@ -82,7 +76,7 @@ class ParticleSystem {
             particle.update();
             particle.display();
             if ((!particle.isAlive()) ||
-                (particle.isDeathExplosionParticle && particle.vel.magSq() < 0.125)
+                (particle.isDeathExplosionParticle && particle.vel.magSq() < 0.01)
             ) {
                 this.particles.splice(i,1);
             }

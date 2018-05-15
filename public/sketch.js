@@ -7,19 +7,24 @@ var background;
 var currentColors = [];
 var platforms = [];
 var leftBuffer;
+var oldLastLand;
+var starting = false;
 
 const DEV_OUTPUT = false;
 
 const PLATFORM_HEIGHT = 20;
+const LENGTHS = [100, 200, 400];
 const PLATFORM_WIDTH = 400;
 const PLATFORM_WIDTH_VARIANCE = 100;
 const PLATFORM_MARGIN = 100;
 const GRAVITY = 12;
+const FREQS1 = [200, 250, 200, 150];
+const FREQS2 = [125, 150, 125, 100];
 var HORIZONTAL_SPEED = 6;
 var COLOR_INDEX = 0;
 var NEXT_COLOR_INDEX = 0;
 
-var colorLerpFactor = 0.0;
+var lerpFactor = 0.0;
 
 function preload() {
     deathSound = loadSound('sound/aesthetic.mp3');
@@ -32,22 +37,18 @@ function devLog(...args) {
 }
 
 function getComplement(color) {
-    var temprgb;
-    var temphsv;
-    temprgb=color;
-    temphsv=RGB2HSV(temprgb);
-    temphsv.hue=HueShift(temphsv.hue, 180.0);
-    temprgb=HSV2RGB(temphsv);
-    return temprgb;
+    var tempRGB;
+    var tempHSV;
+    tempRGB=color;
+    tempHSV=RGB2HSV(tempRGB);
+    tempHSV.hue=hueShift(tempHSV.hue, 180.0);
+    tempRGB=HSV2RGB(tempHSV);
+    return tempRGB;
 }
 
 function initPlayers() {
-  	players[0] = new Player(200, 0, getComplement(colors[0]), HORIZONTAL_SPEED, deathSound);
-    temprgb=colors[1];
-	temphsv=RGB2HSV(temprgb);
-	temphsv.hue=HueShift(temphsv.hue, 180.0);
-    temprgb=HSV2RGB(temphsv);
-  	players[1] = new Player(200, 0, getComplement(colors[1]), HORIZONTAL_SPEED, deathSound);
+  	players[0] = new Player(200, 0, getComplement(colors[0]), HORIZONTAL_SPEED);
+  	players[1] = new Player(200, 0, getComplement(colors[1]), HORIZONTAL_SPEED);
     players.forEach((pi) => {
         pi.restart();
     });
@@ -74,46 +75,76 @@ function drawScores() {
 
 function drawPlatforms() {
     platforms.forEach((platGroup) => {
-        platGroup.forEach((plat) => {
+        platGroup["top"].forEach((plat) => {
+        	plat.display();
+        });
+        platGroup["bottom"].forEach((plat) => {
         	plat.display();
         })
     });
 }
 
 
-function createPlatform(playerId, numPlayers) {
-	var numPlayers = players.length
+function createPlatform() {
+	var numPlayers = players.length;
+
 	players.forEach((pi) => {
 		var playerId = pi.getId();
-		var recent = platforms[playerId - 1][platforms[playerId - 1].length - 1];
-		if (!recent) {
-			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1), 200, PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
-		} else if (frameCount > recent.getTimeCreated() + recent.getRandDelay()) {
-            var delta;
-            if (recent.getSurface() > (height / numPlayers) * (playerId) - 2 * PLATFORM_HEIGHT) {
+        var recent, delta;
+        var firstPush = false;
+
+		if (!platforms[playerId - 1]["bottom"][platforms[playerId - 1]["bottom"].length - 1] || !platforms[playerId - 1]["top"][platforms[playerId - 1]["top"].length - 1]) {
+			platforms[playerId - 1]["bottom"].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1) + (height / (4 * numPlayers)), LENGTHS[Math.floor(Math.random()*LENGTHS.length)], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
+            platforms[playerId - 1]["top"].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1) - (height / (4 * numPlayers)), LENGTHS[Math.floor(Math.random()*LENGTHS.length)], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
+            return;
+		}
+        recent = platforms[playerId - 1]["bottom"][platforms[playerId - 1]["bottom"].length - 1];
+        if (frameCount > recent.getTimeCreated() + recent.getDelay()) {
+            firstPush = true;
+            // bottom
+            if (recent.getSurface() > (height / numPlayers) * playerId - 3 * PLATFORM_HEIGHT) {
                 delta = -PLATFORM_HEIGHT;
-            } else if (recent.getSurface() < (height / numPlayers) * (playerId - 1) + PLATFORM_HEIGHT + PLATFORM_MARGIN) {
+            } else if (recent.getSurface() < (height / (2 * numPlayers)) * (2 * playerId - 1) + 2 * PLATFORM_HEIGHT) {
                 delta = PLATFORM_HEIGHT;
             } else {
-                delta = 0
+                delta = 0;
                 while (delta == 0) {
                     delta = Math.round((Math.random()-0.5)*3)*PLATFORM_HEIGHT;
                 }
             }
 			var newY = recent.getSurface() + delta;
-			var newW = (Math.random() * PLATFORM_WIDTH) + PLATFORM_WIDTH_VARIANCE;
-			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), newY, newW, PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
+			platforms[playerId - 1]["bottom"].push(new Platform(width + averagePlayerPos(players), newY, LENGTHS[Math.floor(Math.random()*LENGTHS.length)], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
+        }
+        recent = platforms[playerId - 1]["top"][platforms[playerId - 1]["top"].length - 1];
+        if (frameCount > recent.getTimeCreated() + recent.getDelay()) {
+            // top
+            if (recent.getSurface() > (height / (2 * numPlayers)) * (2 * playerId - 1) - 2 * PLATFORM_HEIGHT) {
+                delta = -PLATFORM_HEIGHT;
+            } else if (recent.getSurface() < (height / numPlayers) * (playerId - 1) + 4 * PLATFORM_HEIGHT) {
+                delta = PLATFORM_HEIGHT;
+            } else {
+                delta = 0;
+                while (delta == 0) {
+                    delta = Math.round((Math.random()-0.5)*3)*PLATFORM_HEIGHT;
+                }
+            }
+			var newY = recent.getSurface() + delta;
+			platforms[playerId - 1]["top"].push(new Platform(width + averagePlayerPos(players), newY, LENGTHS[Math.floor(Math.random()*LENGTHS.length)], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
 		}
 	})
 }
 
 function cullPlatforms() {
     platforms.forEach((platGroup) => {
-        for (let i = 0; i < platGroup.length; i++) {
-            if (platGroup[i].getRightSurface() < averagePlayerPos(players) - leftBuffer) {
-                platGroup.splice(i, 1);
-            }
-        }
+        Object.keys(platGroup).forEach((k) => {
+            var index = 0;
+            platGroup[k].forEach((platform) => {
+                if (platform.getRightSurface() < averagePlayerPos(players) - leftBuffer) {
+                    platGroup[k].splice(index, 1);
+                }
+                index++;
+            });
+        });
     });
 }
 
@@ -127,7 +158,7 @@ function averagePlayerPos(players) {
 	for (let i = 0; i < players.length; i++) {
 		accumX += players[i].getPos().x;
 	}
-	avg = accumX / players.length
+	avg = accumX / players.length;
 	return avg;
 }
 
@@ -209,63 +240,76 @@ function keyPressed() {
         incColor();
         return false;
     }
+    return false;
 }
 
 function decColor() {
-    if (COLOR_INDEX > 0 && colorLerpFactor >= 1.0) {
-        colorLerpFactor = 0.0;
-        NEXT_COLOR_INDEX = COLOR_INDEX - 1;
-        //COLOR_INDEX--;
+    if (lerpFactor >= 1.0) {
+        lerpFactor = 0.0;
+        NEXT_COLOR_INDEX = (COLOR_INDEX - 1 + colors.length/2) % (colors.length/2);
     }
 }
 
 function incColor() {
-    if (COLOR_INDEX < colors.length / 2 - 1  && colorLerpFactor >= 1.0) {
-        colorLerpFactor = 0.0;
-        NEXT_COLOR_INDEX = COLOR_INDEX + 1;
-        //COLOR_INDEX++;
+    if (lerpFactor >= 1.0) {
+        lerpFactor = 0.0;
+        NEXT_COLOR_INDEX = (COLOR_INDEX + 1 + colors.length/2) % (colors.length/2);
     }
 }
 
 function changeColors() {
-    players[0].setColor(getColor(1));
-    players[1].setColor(getColor(2));
-    platforms[0].forEach((platform) => {
+    platforms[0]["top"].forEach((platform) => {
         platform.setColor(getColor(1));
     });
-    platforms[1].forEach((platform) => {
+    platforms[1]["top"].forEach((platform) => {
+        platform.setColor(getColor(2));
+    });
+    platforms[0]["bottom"].forEach((platform) => {
+        platform.setColor(getColor(1));
+    });
+    platforms[1]["bottom"].forEach((platform) => {
         platform.setColor(getColor(2));
     });
 }
 
-function tomsDnakUpdateFunction() {
-    if (colorLerpFactor < 1.0) {
-        changeColors()
-        colorLerpFactor += 0.01;
+function lerpUpdateFunction() {
+    if (lerpFactor < 1.0) {
+        changeColors();
+        changeFilter();
+        lerpFactor += 0.005;
     } else {
         COLOR_INDEX = NEXT_COLOR_INDEX;
-        //colorLerpFactor = 0.0;
     }
 }
 
 function getColor(player) {
     if (player == 1) {
-        var from = colors[COLOR_INDEX * 2 + 1];
+        var from = (!starting) ? colors[COLOR_INDEX * 2 + 1] : color(255);
         var to = colors[NEXT_COLOR_INDEX * 2 +1]
-        var lerpedColor = lerpColor(from, to, colorLerpFactor);
+        var lerpedColor = lerpColor(from, to, lerpFactor);
         return lerpedColor
 
         //return colors[COLOR_INDEX * 2 + 1];
     } else if (player == 2) {
-        var from = colors[COLOR_INDEX * 2];
+        var from = (!starting) ? colors[COLOR_INDEX * 2] : color(255);
         var to = colors[NEXT_COLOR_INDEX * 2]
-        var lerpedColor = lerpColor(from, to, colorLerpFactor);
+        var lerpedColor = lerpColor(from, to, lerpFactor);
         return lerpedColor
 
         //return colors[COLOR_INDEX * 2];
     } else {
         return null;
     }
+}
+
+function lerpFreq() {
+    var delta1 = FREQS1[NEXT_COLOR_INDEX] - FREQS1[COLOR_INDEX];
+    var delta2 = FREQS2[NEXT_COLOR_INDEX] - FREQS2[COLOR_INDEX];
+    return [FREQS1[COLOR_INDEX] + delta1 * lerpFactor, FREQS2[COLOR_INDEX] + delta2 * lerpFactor];
+}
+
+function changeFilter() {
+    Player.setFilterFreq(lerpFreq()[0], lerpFreq()[1]);
 }
 
 function keyReleased() {
@@ -283,14 +327,21 @@ function keyReleased() {
 }
 
 function initPlatforms() {
-    leftBuffer = width/5;
+    leftBuffer = height/4;
 	for (var i = 0; i < players.length; i++) {
-		platforms.push([]);
+        platforms.push({"top" : [], "bottom" : []});
 	}
 }
 
 function initBackground() {
     background = new Background();
+}
+
+function updateBackground() {
+    if (oldLastLand != players[0].getLastLand() && Math.abs(players[0].getLastLand() - players[1].getLastLand()) < 5) {
+        oldLastLand = players[0].getLastLand();
+        background.update();
+    }
 }
 
 function setup() {
@@ -307,10 +358,12 @@ function setup() {
 function initColors() {
     colors[0] = color(48, 255, 223);
     colors[1] = getComplement(colors[0]);
-    colors[2] = color(255, 230, 73);
+    colors[2] = desaturate(color, 1.25);
     colors[3] = getComplement(colors[2]);
-    colors[4] = color(178, 72, 157);
+    colors[4] = color;
     colors[5] = getComplement(colors[4]);
+    colors[6] = desaturate(color, 0.75);
+    colors[7] = getComplement(colors[6]);
 }
 
 function advance() {
@@ -318,10 +371,15 @@ function advance() {
 }
 
 function draw() {
-    tomsDnakUpdateFunction();
+    if (frameCount < 300) {
+        starting = true;
+    } else {
+        starting = false;
+    }
+    lerpUpdateFunction();
+    updateBackground();
     cullPlatforms();
 	drawBackground();
-    // drawScores();
 	applyGravity();
 	createPlatform();
 	push();
@@ -329,6 +387,4 @@ function draw() {
     drawPlayers();
     drawPlatforms();
     pop();
-
-
 }

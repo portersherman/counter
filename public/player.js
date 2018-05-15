@@ -10,12 +10,12 @@ const MINPENT = "minor_pentatonic_scale";
 const PLAYER_SIZE = 20;
 
 const SCALES = {"major_pentatonic_scale" : [0, 2, 4, 7, 9],
-                "minor_pentatonic_scale"
-                 : [0, 3, 5, 7, 10]};
+                "minor_pentatonic_scale" : [0, 3, 5, 7, 10]};
 
 const BASE_PITCH = 36;
 
-const filter = new p5.LowPass(10000);
+const filter = new p5.LowPass(1000);
+const backFilter = new p5.LowPass(1000);
 
 class Player {
     constructor(x, y, c, speed) {
@@ -27,7 +27,8 @@ class Player {
         this.width = this.mass;
         this.height = this.mass;
         this.color = c;
-        this.damping = 0.8
+        this.damping = 0.8;
+        this.lastLand = Number.NEGATIVE_INFINITY;
         this.animationFrame = 0;
         this.status = WAITING;
         this.class = MAJPENT;
@@ -38,7 +39,7 @@ class Player {
     setupSound() {
         this.env = new p5.Env();
         this.env.setADSR(0.125, 0.125, 0.2, 0.5);
-        this.env.setRange(0.4, 0);
+        this.env.setRange(0.3, 0);
 
         this.osc = new p5.Oscillator();
         this.osc.setType('sawtooth');
@@ -89,8 +90,14 @@ class Player {
         this.color = color;
     }
 
+    static setFilterFreq(frequency1, frequency2) {
+        // console.log("change filter");
+        filter.freq(frequency1);
+        backFilter.freq(frequency2);
+    }
+
     restart() {
-        this.pos.y = (height/this.constructor.latestId)*(this.id - 1) + 50;
+        this.pos.y = (height / this.constructor.latestId) * (this.id - 1) + height / (2 * this.constructor.latestId);
         this.setAnimationState(WAITING);
     }
 
@@ -100,6 +107,10 @@ class Player {
 
     getAcc() {
         return this.acc;
+    }
+
+    getLastLand() {
+        return this.lastLand;
     }
 
     applyForce(f) {
@@ -119,9 +130,11 @@ class Player {
 
     makeTrail() {
         var vel = this.vel.copy();
-        vel.y *= -1;
-        vel.y -= (random() - 0.5);
-        this.trail.pushParticles(4, this.pos.x, this.pos.y, vel, false);
+        vel.y *= 0;
+        vel.y -= (Math.random()*1.5);
+        if (frameCount % 2 == 0) {
+            this.trail.pushParticles(4, this.pos.x - this.mass/2, this.pos.y, vel, false);
+        }
     }
 
     drawTrail() {
@@ -264,6 +277,7 @@ class Player {
     land(platform) {
         this.setAnimationState(LANDING);
         this.animationFrame = 0;
+        this.lastLand = frameCount;
         var freq = this.calculateFrequency(platform.pos.y);
         this.noteOn(freq);
     }
@@ -294,7 +308,6 @@ class Player {
             // bottom
             this.pos.add(createVector(0, (height/this.constructor.latestId)*this.id - (this.pos.y + this.mass/2)));
             this.vel.y *= -bounce;
-            deathSound.play();
             this.trail.deathExplosion(this.pos);
             this.restart();
         } else if (this.pos.y - this.mass/2 <= (height/this.constructor.latestId)*(this.id - 1)) {
@@ -307,21 +320,23 @@ class Player {
     detectCollisions(platforms) {
         if (!this.isWaiting()) {
             var landed = false;
-            platforms[this.id - 1].forEach((platform) => {
-                // Check to see if it landed on a platform
-                if (this.pos.y + this.mass/2 > platform.getSurface() && this.pos.y + this.mass/2 < platform.getBottomSurface()) {
-                    if ((this.pos.x - this.mass/2 < platform.getPos().x + platform.getWidth()) && (this.pos.x + this.mass/2 > platform.getPos().x)) {
-                        if (this.vel.y > 0) {
-                            landed = true;
-                            platform.setActivated();
-                            this.pos.add(createVector(0, platform.getSurface() - (this.pos.y)));
-                            this.vel.y *= 0;
-                            if (this.canLand()) {
-                                this.land(platform);
+            Object.keys(platforms[this.id - 1]).forEach((k) => {
+                platforms[this.id - 1][k].forEach((platform) => {
+                    // Check to see if it landed on a platform
+                    if (this.pos.y + this.mass/2 > platform.getSurface() && this.pos.y + this.mass/2 < platform.getBottomSurface()) {
+                        if ((this.pos.x - this.mass/2 < platform.getPos().x + platform.getWidth()) && (this.pos.x + this.mass/2 > platform.getPos().x)) {
+                            if (this.vel.y > 0) {
+                                landed = true;
+                                platform.setActivated();
+                                this.pos.add(createVector(0, platform.getSurface() - (this.pos.y)));
+                                this.vel.y *= 0;
+                                if (this.canLand()) {
+                                    this.land(platform);
+                                }
                             }
                         }
                     }
-                }
+                });
             });
             if (this.isRunning() && !landed) {
                 // console.log('ouch!')
@@ -332,18 +347,14 @@ class Player {
 
     calculateFrequency(y) {
         var laneHeight = height / 2;
-        y = Math.round(y) % laneHeight;
+        y = Math.floor(y) % laneHeight;
         y = laneHeight - y;
 
         var steps = Math.floor(laneHeight / PLATFORM_HEIGHT);
-        var note = (y / laneHeight * steps);
-        // console.log(note);
-        note = Math.round(note);
+        var note = Math.floor(y / laneHeight * steps);
 
         // Base note + Octave + Degree
         var pitch = BASE_PITCH + (Math.floor(note / SCALES[this.class].length) * 12) + (SCALES[this.class][note % SCALES[this.class].length]);
-        //console.log(Math.floor(note / SCALE.length))
-        //console.log(pitch)
         return midiToFreq(pitch);
     }
 
