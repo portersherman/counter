@@ -38,7 +38,7 @@ class Player {
 
     setupSound() {
         this.env = new p5.Env();
-        this.env.setADSR(0.125, 0.125, 0.2, 0.5);
+        this.env.setADSR(0.125, 0.125, 0.2, 0.75);
         this.env.setRange(0.3, 0);
 
         this.osc = new p5.Oscillator();
