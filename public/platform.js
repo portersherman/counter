@@ -18,7 +18,7 @@ class Platform {
         return this.latestId;
     }
 
-	changeColor(color) {
+	setColor(color) {
         this.color = color;
     }
 

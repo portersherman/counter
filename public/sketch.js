@@ -3,6 +3,7 @@ const X_AXIS = 2
 
 var players = [];
 var colors = [];
+var currentColors = [];
 var platforms = [];
 var leftBuffer;
 
@@ -15,6 +16,9 @@ const PLATFORM_MARGIN = 100;
 const GRAVITY = 12;
 var HORIZONTAL_SPEED = 6;
 var COLOR_INDEX = 0;
+var NEXT_COLOR_INDEX = 0;
+
+var colorLerpFactor = 0.0;
 
 function devLog(...args) {
     if (DEV_OUTPUT) {
@@ -46,6 +50,7 @@ function initPlayers() {
 
 function drawPlayers() {
     players.forEach((pi) => {
+        pi.setColor(getColor(pi.id));
         pi.update();
         pi.detectEdges(0, players.length);
         pi.display();
@@ -159,9 +164,9 @@ function drawBackground() {
 	// setGradient(0, 0, width, height/2, fromTop, toTop, Y_AXIS);
 	// setGradient(0, height/2, width, height/2, fromBottom, toBottom, Y_AXIS);
 	noStroke();
-	fill(colors[COLOR_INDEX*2]);
+	fill(getColor(2));
 	rect(0, 0, width, height/2);
-	fill(colors[COLOR_INDEX*2+1]);
+	fill(getColor(1));
 	rect(0, height/2, width, height/2);
 	// stroke(255);
 	// strokeWeight(2);
@@ -215,36 +220,35 @@ function keyPressed() {
 	}
     if (key == "A") {
         decColor();
-        changeColors();
         return false;
     }
     if (keyCode == LEFT_ARROW) {
         decColor();
-        changeColors();
         return false;
     }
     if (key == "D") {
         incColor();
-        changeColors();
         return false;
     }
     if (keyCode == RIGHT_ARROW) {
         incColor();
-        changeColors();
         return false;
     }
     return false;
 }
 
 function decColor() {
-    if (COLOR_INDEX > 0) {
-        COLOR_INDEX--;
+    if (COLOR_INDEX > 0 && colorLerpFactor >= 1.0) {
+        colorLerpFactor = 0.0;
+        NEXT_COLOR_INDEX = COLOR_INDEX - 1;
+        //COLOR_INDEX--;
     }
 }
 
 function incColor() {
-    if (COLOR_INDEX < colors.length / 2 - 1) {
-        COLOR_INDEX++;
+    if (COLOR_INDEX < colors.length / 2 - 1  && colorLerpFactor >= 1.0) {
+        colorLerpFactor = 0.0;
+        NEXT_COLOR_INDEX = COLOR_INDEX + 1;
     }
 }
 
@@ -265,11 +269,31 @@ function changeColors() {
     });
 }
 
+function tomsDnakUpdateFunction() {
+    if (colorLerpFactor < 1.0) {
+        changeColors()
+        colorLerpFactor += 0.01;
+    } else {
+        COLOR_INDEX = NEXT_COLOR_INDEX;
+        //colorLerpFactor = 0.0;
+    }
+}
+
 function getColor(player) {
     if (player == 1) {
-        return colors[COLOR_INDEX * 2 + 1];
+        var from = colors[COLOR_INDEX * 2 + 1];
+        var to = colors[NEXT_COLOR_INDEX * 2 +1]
+        var lerpedColor = lerpColor(from, to, colorLerpFactor);
+        return lerpedColor
+
+        //return colors[COLOR_INDEX * 2 + 1];
     } else if (player == 2) {
-        return colors[COLOR_INDEX * 2];
+        var from = colors[COLOR_INDEX * 2];
+        var to = colors[NEXT_COLOR_INDEX * 2]
+        var lerpedColor = lerpColor(from, to, colorLerpFactor);
+        return lerpedColor
+
+        //return colors[COLOR_INDEX * 2];
     } else {
         return null;
     }
@@ -320,6 +344,7 @@ function advance() {
 }
 
 function draw() {
+    tomsDnakUpdateFunction();
     cullPlatforms();
 	drawBackground();
     // drawScores();
@@ -330,4 +355,6 @@ function draw() {
     drawPlayers();
     drawPlatforms();
     pop();
+
+
 }
