@@ -20,7 +20,6 @@ var NEXT_COLOR_INDEX = 0;
 
 var colorLerpFactor = 0.0;
 
-
 function devLog(...args) {
     if (DEV_OUTPUT) {
         args.forEach((a) => console.log(a));
@@ -78,17 +77,12 @@ function drawPlatforms() {
 
 
 function createPlatform(playerId, numPlayers) {
-    if (playerId == 1) {
-        otherPlayer = 2;
-    } else {
-        otherPlayer = 1;
-    }
 	var numPlayers = players.length
 	players.forEach((pi) => {
 		var playerId = pi.getId();
 		var recent = platforms[playerId - 1][platforms[playerId - 1].length - 1];
 		if (!recent) {
-			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1), 80, PLATFORM_HEIGHT, getColor(playerId), getColor(otherPlayer), pi.getVel().x));
+			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1), 200, PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
 		} else if (frameCount > recent.getTimeCreated() + recent.getRandDelay()) {
             var delta;
             if (recent.getSurface() > (height / numPlayers) * (playerId) - 2 * PLATFORM_HEIGHT) {
@@ -103,7 +97,7 @@ function createPlatform(playerId, numPlayers) {
             }
 			var newY = recent.getSurface() + delta;
 			var newW = (Math.random() * PLATFORM_WIDTH) + PLATFORM_WIDTH_VARIANCE;
-			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), newY, newW, PLATFORM_HEIGHT, getColor(playerId), getColor(otherPlayer), pi.getVel().x));
+			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), newY, newW, PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
 		}
 	})
 }
@@ -196,28 +190,24 @@ function keyPressed() {
 	}
     if (key == "A") {
         decColor();
-        changeColors();
         return false;
     }
     if (keyCode == LEFT_ARROW) {
         decColor();
-        changeColors();
         return false;
     }
     if (key == "D") {
         incColor();
-        changeColors();
         return false;
     }
     if (keyCode == RIGHT_ARROW) {
         incColor();
-        changeColors();
         return false;
     }
 }
 
 function decColor() {
-    if (COLOR_INDEX > 0) {
+    if (COLOR_INDEX > 0 && colorLerpFactor >= 1.0) {
         colorLerpFactor = 0.0;
         NEXT_COLOR_INDEX = COLOR_INDEX - 1;
         //COLOR_INDEX--;
@@ -225,7 +215,7 @@ function decColor() {
 }
 
 function incColor() {
-    if (COLOR_INDEX < colors.length / 2 - 1) {
+    if (COLOR_INDEX < colors.length / 2 - 1  && colorLerpFactor >= 1.0) {
         colorLerpFactor = 0.0;
         NEXT_COLOR_INDEX = COLOR_INDEX + 1;
         //COLOR_INDEX++;
@@ -236,22 +226,20 @@ function changeColors() {
     players[0].setColor(getColor(1));
     players[1].setColor(getColor(2));
     platforms[0].forEach((platform) => {
-        platform.setColor(getColor(1), getColor(2));
+        platform.setColor(getColor(1));
     });
     platforms[1].forEach((platform) => {
-        platform.setColor(getColor(2), getColor(1));
+        platform.setColor(getColor(2));
     });
 }
 
-function tomsDankUpdateFunction() {
-    console.log(colorLerpFactor)
-    if (COLOR_INDEX != NEXT_COLOR_INDEX) {
+function tomsDnakUpdateFunction() {
+    if (colorLerpFactor < 1.0) {
+        changeColors()
         colorLerpFactor += 0.01;
-        if (colorLerpFactor > 1.0) {
-            COLOR_INDEX = NEXT_COLOR_INDEX;
-        }
     } else {
-        colorLerpFactor = 0.0;
+        COLOR_INDEX = NEXT_COLOR_INDEX;
+        //colorLerpFactor = 0.0;
     }
 }
 
@@ -320,7 +308,7 @@ function advance() {
 }
 
 function draw() {
-    tomsDankUpdateFunction();
+    tomsDnakUpdateFunction();
     cullPlatforms();
 	drawBackground();
     // drawScores();

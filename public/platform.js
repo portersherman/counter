@@ -1,11 +1,10 @@
 class Platform {
-	constructor(x, y, w, h, c, complement, speed) {
+	constructor(x, y, w, h, c, speed) {
 		this.id = Platform.incrementId();
 		this.pos = createVector(x, y);
 		this.width = w;
 		this.height = h;
 		this.color = c;
-		this.complement = complement;
 		this.created = frameCount;
 		this.activated = false;
 		this.randDelay = w / speed + 30;
@@ -19,9 +18,8 @@ class Platform {
         return this.latestId;
     }
 
-	setColor(color, complement) {
+	setColor(color) {
         this.color = color;
-        this.complement = complement;
     }
 
 	setActivated() {
@@ -60,16 +58,17 @@ class Platform {
 		// fill(this.color);
 		// stroke(255);
 		// strokeWeight(3);
-		noStroke();
-		fill(this.color);
+		stroke(this.color);
+		strokeWeight(3);
+		noFill();
 		rectMode(CORNER);
 		rect(this.pos.x, this.pos.y, this.width, this.height);
 
-		if (!this.activated) {
+		if (this.activated) {
 			noStroke()
-			noFill();
+			fill(this.color);
 			rectMode(CORNER);
-			rect(this.pos.x + 3, this.pos.y + 3, this.width - 6, this.height - 6);
+			rect(this.pos.x, this.pos.y, this.width, this.height);
 		}
 	}
 }
