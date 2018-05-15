@@ -27,21 +27,17 @@ function devLog(...args) {
 }
 
 function getComplement(color) {
-    var temprgb;
-    var temphsv;
-    temprgb=color;
-    temphsv=RGB2HSV(temprgb);
-    temphsv.hue=HueShift(temphsv.hue, 180.0);
-    temprgb=HSV2RGB(temphsv);
-    return temprgb;
+    var tempRGB;
+    var tempHSV;
+    tempRGB=color;
+    tempHSV=RGB2HSV(tempRGB);
+    tempHSV.hue=hueShift(tempHSV.hue, 180.0);
+    tempRGB=HSV2RGB(tempHSV);
+    return tempRGB;
 }
 
 function initPlayers() {
   	players[0] = new Player(200, 0, getComplement(colors[0]), HORIZONTAL_SPEED);
-    temprgb=colors[1];
-	temphsv=RGB2HSV(temprgb);
-	temphsv.hue=HueShift(temphsv.hue, 180.0);
-    temprgb=HSV2RGB(temphsv);
   	players[1] = new Player(200, 0, getComplement(colors[1]), HORIZONTAL_SPEED);
     players.forEach((pi) => {
         pi.restart();
@@ -321,7 +317,7 @@ function initPlatforms() {
 
 function setup() {
 	frameRate(60);
-    createColors();
+    createColors(color(51, 255, 225));
     createCanvas(windowWidth, windowHeight);
     drawBackground();
     initPlayers();
@@ -329,14 +325,14 @@ function setup() {
     createPlatform();
 }
 
-function createColors() {
-    colors[0] = color(102, 255, 232);
+function createColors(color) {
+    colors[0] = color;
     colors[1] = getComplement(colors[0]);
-    colors[2] = color(51, 255, 225);
+    colors[2] = desaturate(color, 1.25);
     colors[3] = getComplement(colors[2]);
-    colors[4] = color(0, 255, 217);
+    colors[4] = color;
     colors[5] = getComplement(colors[4]);
-    colors[6] = color(51, 255, 225);
+    colors[6] = desaturate(color, 0.75);
     colors[7] = getComplement(colors[6]);
 }
 
