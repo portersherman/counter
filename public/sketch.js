@@ -238,34 +238,33 @@ function keyPressed() {
 }
 
 function decColor() {
-    if (COLOR_INDEX > 0 && colorLerpFactor >= 1.0) {
+    if (colorLerpFactor >= 1.0) {
         colorLerpFactor = 0.0;
-        NEXT_COLOR_INDEX = COLOR_INDEX - 1;
-        //COLOR_INDEX--;
+        NEXT_COLOR_INDEX = (COLOR_INDEX - 1 + colors.length/2) % (colors.length/2);
+        console.log(NEXT_COLOR_INDEX);
     }
 }
 
 function incColor() {
-    if (COLOR_INDEX < colors.length / 2 - 1  && colorLerpFactor >= 1.0) {
+    if (colorLerpFactor >= 1.0) {
         colorLerpFactor = 0.0;
-        NEXT_COLOR_INDEX = COLOR_INDEX + 1;
+        NEXT_COLOR_INDEX = (COLOR_INDEX + 1 + colors.length/2) % (colors.length/2);
+        console.log(NEXT_COLOR_INDEX);
     }
 }
 
 function changeColors() {
-    players[0].changeColor(getColor(1));
-    players[1].changeColor(getColor(2));
     platforms[0]["top"].forEach((platform) => {
-        platform.changeColor(getColor(1));
+        platform.setColor(getColor(1));
     });
     platforms[1]["top"].forEach((platform) => {
-        platform.changeColor(getColor(2));
+        platform.setColor(getColor(2));
     });
     platforms[0]["bottom"].forEach((platform) => {
-        platform.changeColor(getColor(1));
+        platform.setColor(getColor(1));
     });
     platforms[1]["bottom"].forEach((platform) => {
-        platform.changeColor(getColor(2));
+        platform.setColor(getColor(2));
     });
 }
 
@@ -331,12 +330,14 @@ function setup() {
 }
 
 function createColors() {
-    colors[0] = color(48, 255, 223);
+    colors[0] = color(102, 255, 232);
     colors[1] = getComplement(colors[0]);
-    colors[2] = color(255, 230, 73);
+    colors[2] = color(51, 255, 225);
     colors[3] = getComplement(colors[2]);
-    colors[4] = color(178, 72, 157);
+    colors[4] = color(0, 255, 217);
     colors[5] = getComplement(colors[4]);
+    colors[6] = color(51, 255, 225);
+    colors[7] = getComplement(colors[6]);
 }
 
 function advance() {
