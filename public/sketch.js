@@ -346,7 +346,7 @@ function updateBackground() {
 
 function setup() {
 	frameRate(60);
-    initColors();
+    initColors(color(48, 255, 223));
     createCanvas(windowWidth, windowHeight);
     drawBackground();
     initPlayers();
@@ -355,8 +355,8 @@ function setup() {
     createPlatform();
 }
 
-function initColors() {
-    colors[0] = color(48, 255, 223);
+function initColors(color) {
+    colors[0] = color;
     colors[1] = getComplement(colors[0]);
     colors[2] = desaturate(color, 1.25);
     colors[3] = getComplement(colors[2]);
