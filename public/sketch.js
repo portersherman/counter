@@ -64,35 +64,62 @@ function drawScores() {
 
 function drawPlatforms() {
     platforms.forEach((platGroup) => {
-        platGroup.forEach((plat) => {
+        platGroup["top"].forEach((plat) => {
+        	plat.display();
+        });
+        platGroup["bottom"].forEach((plat) => {
         	plat.display();
         })
     });
 }
 
 
-function createPlatform(playerId, numPlayers) {
+function createPlatform() {
 	var numPlayers = players.length
+    var lengths = [100, 200];
+
 	players.forEach((pi) => {
 		var playerId = pi.getId();
-		var recent = platforms[playerId - 1][platforms[playerId - 1].length - 1];
-		if (!recent) {
-			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1), 200, PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
-		} else if (frameCount > recent.getTimeCreated() + recent.getRandDelay()) {
-            var delta;
-            if (recent.getSurface() > (height / numPlayers) * (playerId) - 2 * PLATFORM_HEIGHT) {
+        var recent, delta;
+        var firstPush = false;
+
+		if (!platforms[playerId - 1]["bottom"][platforms[playerId - 1]["bottom"].length - 1] || !platforms[playerId - 1]["top"][platforms[playerId - 1]["top"].length - 1]) {
+			platforms[playerId - 1]["bottom"].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1) + (height / (4 * numPlayers)), lengths[Math.round(Math.random())], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
+            platforms[playerId - 1]["top"].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1) - (height / (4 * numPlayers)), lengths[Math.round(Math.random())], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
+            return;
+		}
+        recent = platforms[playerId - 1]["bottom"][platforms[playerId - 1]["bottom"].length - 1];
+        if (frameCount > recent.getTimeCreated() + recent.getDelay()) {
+            firstPush = true;
+            // bottom
+            if (recent.getSurface() > (height / numPlayers) * playerId - 3 * PLATFORM_HEIGHT) {
                 delta = -PLATFORM_HEIGHT;
-            } else if (recent.getSurface() < (height / numPlayers) * (playerId - 1) + PLATFORM_HEIGHT + PLATFORM_MARGIN) {
+            } else if (recent.getSurface() < (height / (2 * numPlayers)) * (2 * playerId - 1) + 2 * PLATFORM_HEIGHT) {
                 delta = PLATFORM_HEIGHT;
             } else {
-                delta = 0
+                delta = 0;
                 while (delta == 0) {
                     delta = Math.round((Math.random()-0.5)*3)*PLATFORM_HEIGHT;
                 }
             }
 			var newY = recent.getSurface() + delta;
-			var newW = (Math.random() * PLATFORM_WIDTH) + PLATFORM_WIDTH_VARIANCE;
-			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), newY, newW, PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
+			platforms[playerId - 1]["bottom"].push(new Platform(width + averagePlayerPos(players), newY, lengths[Math.round(Math.random())], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
+        }
+        recent = platforms[playerId - 1]["top"][platforms[playerId - 1]["top"].length - 1];
+        if (frameCount > recent.getTimeCreated() + recent.getDelay()) {
+            // top
+            if (recent.getSurface() > (height / (2 * numPlayers)) * (2 * playerId - 1) - 2 * PLATFORM_HEIGHT) {
+                delta = -PLATFORM_HEIGHT;
+            } else if (recent.getSurface() < (height / numPlayers) * (playerId - 1) + 4 * PLATFORM_HEIGHT) {
+                delta = PLATFORM_HEIGHT;
+            } else {
+                delta = 0;
+                while (delta == 0) {
+                    delta = Math.round((Math.random()-0.5)*3)*PLATFORM_HEIGHT;
+                }
+            }
+			var newY = recent.getSurface() + delta;
+			platforms[playerId - 1]["top"].push(new Platform(width + averagePlayerPos(players), newY, lengths[Math.round(Math.random())], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
 		}
 	})
 }
@@ -100,8 +127,11 @@ function createPlatform(playerId, numPlayers) {
 function cullPlatforms() {
     platforms.forEach((platGroup) => {
         for (let i = 0; i < platGroup.length; i++) {
-            if (platGroup[i].getRightSurface() < averagePlayerPos(players) - leftBuffer) {
-                platGroup.splice(i, 1);
+            if (platGroup["top"][i].getRightSurface() < averagePlayerPos(players) - leftBuffer) {
+                platGroup["top"].splice(i, 1);
+            }
+            if (platGroup["bottom"][i].getRightSurface() < averagePlayerPos(players) - leftBuffer) {
+                platGroup["bottom"].splice(i, 1);
             }
         }
     });
@@ -117,7 +147,7 @@ function averagePlayerPos(players) {
 	for (let i = 0; i < players.length; i++) {
 		accumX += players[i].getPos().x;
 	}
-	avg = accumX / players.length
+	avg = accumX / players.length;
 	return avg;
 }
 
@@ -203,6 +233,7 @@ function keyPressed() {
         changeColors();
         return false;
     }
+    return false;
 }
 
 function decColor() {
@@ -212,7 +243,6 @@ function decColor() {
 }
 
 function incColor() {
-
     if (COLOR_INDEX < colors.length / 2 - 1) {
         COLOR_INDEX++;
     }
@@ -221,10 +251,16 @@ function incColor() {
 function changeColors() {
     players[0].changeColor(getColor(1));
     players[1].changeColor(getColor(2));
-    platforms[0].forEach((platform) => {
+    platforms[0]["top"].forEach((platform) => {
         platform.changeColor(getColor(1));
     });
-    platforms[1].forEach((platform) => {
+    platforms[1]["top"].forEach((platform) => {
+        platform.changeColor(getColor(2));
+    });
+    platforms[0]["bottom"].forEach((platform) => {
+        platform.changeColor(getColor(1));
+    });
+    platforms[1]["bottom"].forEach((platform) => {
         platform.changeColor(getColor(2));
     });
 }
@@ -256,7 +292,7 @@ function keyReleased() {
 function initPlatforms() {
     leftBuffer = width/5;
 	for (var i = 0; i < players.length; i++) {
-		platforms.push([]);
+        platforms.push({"top" : [], "bottom" : []});
 	}
 }
 

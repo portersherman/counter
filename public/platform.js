@@ -7,7 +7,7 @@ class Platform {
 		this.color = c;
 		this.created = frameCount;
 		this.activated = false;
-		this.randDelay = w / speed + 30;
+		this.delay = (w / speed);
 	}
 
 	static incrementId() {
@@ -30,8 +30,8 @@ class Platform {
 		return this.created;
 	}
 
-	getRandDelay() {
-		return this.randDelay;
+	getDelay() {
+		return this.delay;
 	}
 
 	getSurface() {

@@ -404,21 +404,23 @@ class Player {
     detectCollisions(platforms) {
         if (!this.isWaiting()) {
             var landed = false;
-            platforms[this.id - 1].forEach((platform) => {
-                // Check to see if it landed on a platform
-                if (this.pos.y + this.mass/2 > platform.getSurface() && this.pos.y + this.mass/2 < platform.getBottomSurface()) {
-                    if ((this.pos.x - this.mass/2 < platform.getPos().x + platform.getWidth()) && (this.pos.x + this.mass/2 > platform.getPos().x)) {
-                        if (this.vel.y > 0) {
-                            landed = true;
-                            platform.setActivated();
-                            this.pos.add(createVector(0, platform.getSurface() - (this.pos.y)));
-                            this.vel.y *= 0;
-                            if (this.canLand()) {
-                                this.land(platform);
+            Object.keys(platforms[this.id - 1]).forEach((k) => {
+                platforms[this.id - 1][k].forEach((platform) => {
+                    // Check to see if it landed on a platform
+                    if (this.pos.y + this.mass/2 > platform.getSurface() && this.pos.y + this.mass/2 < platform.getBottomSurface()) {
+                        if ((this.pos.x - this.mass/2 < platform.getPos().x + platform.getWidth()) && (this.pos.x + this.mass/2 > platform.getPos().x)) {
+                            if (this.vel.y > 0) {
+                                landed = true;
+                                platform.setActivated();
+                                this.pos.add(createVector(0, platform.getSurface() - (this.pos.y)));
+                                this.vel.y *= 0;
+                                if (this.canLand()) {
+                                    this.land(platform);
+                                }
                             }
                         }
                     }
-                }
+                });
             });
             if (this.isRunning() && !landed) {
                 // console.log('ouch!')
@@ -429,18 +431,14 @@ class Player {
 
     calculateFrequency(y) {
         var laneHeight = height / 2;
-        y = Math.round(y) % laneHeight;
+        y = Math.floor(y) % laneHeight;
         y = laneHeight - y;
 
         var steps = Math.floor(laneHeight / PLATFORM_HEIGHT);
-        var note = (y / laneHeight * steps);
-        // console.log(note);
-        note = Math.round(note);
+        var note = Math.floor(y / laneHeight * steps);
 
         // Base note + Octave + Degree
         var pitch = BASE_PITCH + (Math.floor(note / SCALES[this.class].length) * 12) + (SCALES[this.class][note % SCALES[this.class].length]);
-        //console.log(Math.floor(note / SCALE.length))
-        //console.log(pitch)
         return midiToFreq(pitch);
     }
 
