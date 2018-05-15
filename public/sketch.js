@@ -3,6 +3,7 @@ const X_AXIS = 2
 
 var players = [];
 var colors = [];
+var background;
 var currentColors = [];
 var platforms = [];
 var leftBuffer;
@@ -20,6 +21,10 @@ var COLOR_INDEX = 0;
 var NEXT_COLOR_INDEX = 0;
 
 var lerpFactor = 0.0;
+
+function preload() {
+    deathSound = loadSound('sound/aesthetic.mp3');
+}
 
 function devLog(...args) {
     if (DEV_OUTPUT) {
@@ -324,6 +329,10 @@ function initPlatforms() {
 	}
 }
 
+function initBackground() {
+    background = new Background();
+}
+
 function setup() {
 	frameRate(60);
     createColors(color(51, 255, 225));
@@ -331,6 +340,7 @@ function setup() {
     drawBackground();
     initPlayers();
     initPlatforms();
+    initBackground();
     createPlatform();
 }
 
