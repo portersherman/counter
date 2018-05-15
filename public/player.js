@@ -12,7 +12,7 @@ const PLAYER_SIZE = 20;
 const SCALES = {"major_pentatonic_scale" : [0, 2, 4, 7, 9],
                 "minor_pentatonic_scale" : [0, 3, 5, 7, 10]};
 
-const BASE_PITCH = 36;
+const BASE_PITCH = 60;
 
 const filter = new p5.LowPass(1000);
 const backFilter = new p5.LowPass(1000);
