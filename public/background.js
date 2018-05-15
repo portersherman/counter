@@ -9,7 +9,7 @@ class Background {
         this.basePitch = 60;
 
         this.env = new p5.Env();
-        this.env.setADSR(1, 0.5, 0.2, 0.5);
+        this.env.setADSR(5, 0.5, 0.2, 0.5);
         this.env.setRange(0.25, 0);
 
         this.oscs = [];
