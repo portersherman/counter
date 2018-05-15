@@ -1,10 +1,11 @@
 class Platform {
-	constructor(x, y, w, h, c, speed) {
+	constructor(x, y, w, h, c, complement, speed) {
 		this.id = Platform.incrementId();
 		this.pos = createVector(x, y);
 		this.width = w;
 		this.height = h;
 		this.color = c;
+		this.complement = complement;
 		this.created = frameCount;
 		this.activated = false;
 		this.randDelay = w / speed + 30;
@@ -17,9 +18,10 @@ class Platform {
         else this.latestId++;
         return this.latestId;
     }
-	
-	changeColor(color) {
+
+	setColor(color, complement) {
         this.color = color;
+        this.complement = complement;
     }
 
 	setActivated() {
@@ -65,7 +67,7 @@ class Platform {
 
 		if (!this.activated) {
 			noStroke()
-			fill(getComplement(this.color));
+			noFill();
 			rectMode(CORNER);
 			rect(this.pos.x + 3, this.pos.y + 3, this.width - 6, this.height - 6);
 		}
