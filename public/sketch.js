@@ -334,7 +334,7 @@ function initBackground() {
 }
 
 function updateBackground() {
-    if (oldLastLand != players[0].getLastLand() && Math.abs(players[0].getLastLand() - players[1].getLastLand()) < 5) {
+    if (oldLastLand != players[0].getLastLand() && Math.abs(players[0].getLastLand() - players[1].getLastLand()) < 3) {
         oldLastLand = players[0].getLastLand();
         background.update();
     }

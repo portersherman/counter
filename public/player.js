@@ -15,6 +15,8 @@ const SCALES = {"major_pentatonic_scale" : [0, 2, 4, 7, 9],
 const BASE_PITCH = 60;
 
 const filter = new p5.LowPass(1000);
+const verb = new p5.Reverb();
+verb.process(filter, 5, 2);
 const backFilter = new p5.LowPass(1000);
 
 class Player {
@@ -38,7 +40,7 @@ class Player {
 
     setupSound() {
         this.env = new p5.Env();
-        this.env.setADSR(0.125, 0.125, 0.2, 0.75);
+        this.env.setADSR(0.25, 0.125, 0.2, 0.75);
         this.env.setRange(0.3, 0);
 
         this.osc = new p5.Oscillator();
