@@ -13,6 +13,24 @@ body {
     -webkit-animation: Gradient 30s ease infinite;
     -moz-animation: Gradient 30s ease infinite;
     animation: Gradient 30s ease infinite;
+
+    transition: all 3s;
+}
+
+#overlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #FFF;
+    transition: background-color 3s ease;
+    -webkit-transition: background-color 3s ease;
+    -moz-transition: background-color 3s ease;
+    -o-transition: background-color 3s ease;
 }
 
 @-webkit-keyframes Gradient {
@@ -235,19 +253,4 @@ a.btn {
               background-color 0.3s ease-in,
               border-color 0.3s ease-in;
               color 0.3s ease-in,
-}
-
-#overlay {
-    position: fixed;
-    display: none;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    opacity: 0;
-    background-color: #fff;
-    transition: opacity 5s, visibility 0s 0.5s;
-    z-index: 2;
 }

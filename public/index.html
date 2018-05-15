@@ -3,14 +3,12 @@
   <head>
     <title>CounterPointless</title>
     <meta name="viewport" width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0>
-    <script src="/scroll.js" type="text/javascript" charset="utf-8" async defer></script>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <script src="/script.js" type="text/javascript" charset="utf-8" async defer></script>
   </head>
   </head>
   <body>
-    <div id="overlay"></div>
-
     <div class="flexbox-container">
       <div class="flexbox-item fixed">
         <div class="title-box">
@@ -23,7 +21,7 @@
               <h6 class="justified description">
                 We seek to connect the world through shared understanding of sonic and visual experiences; using collaboration and technology to advance the human race.
               </h6>
-              <a onClick="scrollToNextPage();" class="scroll"><p><span class="chevron bottom"></span></p></a>
+              <a onClick="scrollToNextPage(this);" class="scroll"><p><span class="chevron bottom"></span></p></a>
             </div>
         </div>
       </div>
@@ -37,16 +35,14 @@
               Controls: W or UP to jump, A/D or LEFT/RIGHT to control the timbre of the sound.  The music in the background will react to your playing, and hopefully your partner will too!
             </h6>
             <div class="btn-container">
-              <a
-                class="btn ghost-button-semi-transparent"
-                id="second-page"
-                onClick="showOverlay();"
-              >
+              <a onClick="fadeIn(event);" class="btn ghost-button-semi-transparent" id="second-page" href="sketch.html">
                 PLAY
               </a>
             </div>
         </div>
       </div>
+    </div>
+    <div id="overlay">
     </div>
   </body>
 </html>
