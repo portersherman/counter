@@ -36,6 +36,7 @@ class Player {
         this.class = MAJPENT;
         this.setupSound();
         this.trail = new ParticleSystem(5, this.pos.x, this.pos.y, 40);
+        this.jumps = 0;
     }
 
     setupSound() {
@@ -101,6 +102,7 @@ class Player {
     restart() {
         this.pos.y = (height / this.constructor.latestId) * (this.id - 1) + height / (2 * this.constructor.latestId);
         this.setAnimationState(WAITING);
+        this.jumps = 0;
     }
 
     getVel() {
@@ -115,8 +117,12 @@ class Player {
         return this.lastLand;
     }
 
-    applyForce(f) {
-        this.acc.add(f.copy().div(this.mass));
+    applyForce(f, isJump) {
+        if (isJump && this.jumps == 2) {
+            this.acc.add(f.copy().div(this.mass).mult(this.jumps / 1.5));
+        } else {
+            this.acc.add(f.copy().div(this.mass));
+        }
     }
 
     update() {
@@ -130,11 +136,12 @@ class Player {
         this.acc.set(0,0);
     }
 
-    makeTrail() {
+    makeTrail(isDoubleJump) {
         var vel = this.vel.copy();
         vel.y *= 0;
         vel.y -= (Math.random()*1.5);
-        if (frameCount % 2 == 0) {
+        var freq = (isDoubleJump) ? 1 : 2;
+        if (frameCount % freq == 0) {
             this.trail.pushParticles(4, this.pos.x - this.mass/2, this.pos.y, vel, false);
         }
     }
@@ -251,11 +258,7 @@ class Player {
     }
 
     canJump() {
-      return (
-          this.isRunning() ||
-          this.isLanding() ||
-          this.isWaiting()
-      );
+      return (this.jumps < 2);
     }
 
     canLand() {
@@ -274,6 +277,11 @@ class Player {
         this.setAnimationState(FLOATING);
         this.animationFrame = 0;
         this.noteOff();
+        this.jumps++;
+        if (this.jumps == 2) {
+            console.log("make trail");
+            this.makeTrail(true);
+        }
     }
 
     land(platform) {
@@ -282,12 +290,14 @@ class Player {
         this.lastLand = frameCount;
         var freq = this.calculateFrequency(platform.pos.y);
         this.noteOn(freq);
+        this.jumps = 0;
     }
 
     fall() {
         this.setAnimationState(FALLING);
         this.animationFrame = 0;
         this.noteOff();
+        this.jumps++;
     }
 
     noteOn(f) {

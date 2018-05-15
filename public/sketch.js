@@ -9,6 +9,9 @@ var platforms = [];
 var leftBuffer;
 var oldLastLand;
 var starting = false;
+var jumpForce = -300;
+var jumpVel = -14.4
+var fallForce = 100;
 
 const DEV_OUTPUT = false;
 
@@ -201,22 +204,18 @@ function applyGravity() {
 	}
 }
 
-var jumpForce = -300;
-var jumpVel = -14.4
-var fallForce = 100;
-
 function keyPressed() {
 	if (players[0].canJump()) {
 		if (key == "W") {
             players[0].jump();
-			players[0].applyForce(createVector(0, jumpForce));
+			players[0].applyForce(createVector(0, jumpForce), true);
             return false;
 		}
 	}
 	if (players[1].canJump()) {
 		if (keyCode == UP_ARROW) {
             players[1].jump();
-			players[1].applyForce(createVector(0, jumpForce));
+			players[1].applyForce(createVector(0, jumpForce), true);
             return false;
 		}
 	}

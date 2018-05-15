@@ -7,7 +7,7 @@ class Platform {
 		this.color = c;
 		this.created = frameCount;
 		this.activated = false;
-		this.delay = (w / speed);
+		this.delay = 2*(w / speed);
 	}
 
 	static incrementId() {
