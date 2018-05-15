@@ -11,9 +11,10 @@ const DEV_OUTPUT = false;
 const PLATFORM_HEIGHT = 20;
 const PLATFORM_WIDTH = 400;
 const PLATFORM_WIDTH_VARIANCE = 100;
-var HORIZONTAL_SPEED = 6;
 const PLATFORM_MARGIN = 100;
 const GRAVITY = 12;
+var HORIZONTAL_SPEED = 6;
+var COLOR_INDEX = 0;
 
 
 function devLog(...args) {
@@ -77,7 +78,7 @@ function createPlatform(playerId, numPlayers) {
 		var playerId = pi.getId();
 		var recent = platforms[playerId - 1][platforms[playerId - 1].length - 1];
 		if (!recent) {
-			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1), 80, PLATFORM_HEIGHT, getComplement(colors[playerId - 1]), pi.getVel().x));
+			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1), 80, PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
 		} else if (frameCount > recent.getTimeCreated() + recent.getRandDelay()) {
             var delta;
             if (recent.getSurface() > (height / numPlayers) * (playerId) - 2 * PLATFORM_HEIGHT) {
@@ -92,7 +93,7 @@ function createPlatform(playerId, numPlayers) {
             }
 			var newY = recent.getSurface() + delta;
 			var newW = (Math.random() * PLATFORM_WIDTH) + PLATFORM_WIDTH_VARIANCE;
-			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), newY, newW, PLATFORM_HEIGHT, getComplement(colors[playerId - 1]), pi.getVel().x));
+			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), newY, newW, PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
 		}
 	})
 }
@@ -129,9 +130,9 @@ function drawBackground() {
 	// setGradient(0, 0, width, height/2, fromTop, toTop, Y_AXIS);
 	// setGradient(0, height/2, width, height/2, fromBottom, toBottom, Y_AXIS);
 	noStroke();
-	fill(colors[0]);
+	fill(colors[COLOR_INDEX*2]);
 	rect(0, 0, width, height/2);
-	fill(colors[1]);
+	fill(colors[COLOR_INDEX*2+1]);
 	rect(0, height/2, width, height/2);
 	// stroke(255);
 	// strokeWeight(2);
@@ -184,20 +185,58 @@ function keyPressed() {
 		}
 	}
     if (key == "A") {
-        players[0].switchClass();
+        decColor();
+        changeColors();
         return false;
     }
     if (keyCode == LEFT_ARROW) {
-        players[1].switchClass();
+        decColor();
+        changeColors();
         return false;
     }
     if (key == "D") {
-        players[0].switchClass();
+        incColor();
+        changeColors();
         return false;
     }
     if (keyCode == RIGHT_ARROW) {
-        players[1].switchClass();
+        incColor();
+        changeColors();
         return false;
+    }
+}
+
+function decColor() {
+    if (COLOR_INDEX > 0) {
+        COLOR_INDEX--;
+    }
+}
+
+function incColor() {
+
+    if (COLOR_INDEX < colors.length / 2 - 1) {
+        COLOR_INDEX++;
+    }
+}
+
+function changeColors() {
+    players[0].changeColor(getColor(1));
+    players[1].changeColor(getColor(2));
+    platforms[0].forEach((platform) => {
+        platform.changeColor(getColor(1));
+    });
+    platforms[1].forEach((platform) => {
+        platform.changeColor(getColor(2));
+    });
+}
+
+function getColor(player) {
+    if (player == 1) {
+        return colors[COLOR_INDEX * 2 + 1];
+    } else if (player == 2) {
+        return colors[COLOR_INDEX * 2];
+    } else {
+        return null;
     }
 }
 
@@ -224,14 +263,21 @@ function initPlatforms() {
 
 function setup() {
 	frameRate(60);
-    colors[0] = color(48, 255, 223);
-    colors[1] = getComplement(colors[0]);
+    createColors();
     createCanvas(windowWidth, windowHeight);
     drawBackground();
     initPlayers();
     initPlatforms();
     createPlatform();
+}
 
+function createColors() {
+    colors[0] = color(48, 255, 223);
+    colors[1] = getComplement(colors[0]);
+    colors[2] = color(255, 230, 73);
+    colors[3] = getComplement(colors[2]);
+    colors[4] = color(178, 72, 157);
+    colors[5] = getComplement(colors[4]);
 }
 
 function advance() {

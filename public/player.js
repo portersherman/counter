@@ -84,6 +84,10 @@ class Player {
         return this.latestId;
     }
 
+    changeColor(color) {
+        this.color = color;
+    }
+
     restart() {
         this.pos.y = (height/this.constructor.latestId)*(this.id - 1) + 50;
         this.setAnimationState(WAITING);
@@ -108,15 +112,15 @@ class Player {
         }
         dampVel = this.vel.copy();
         dampVel.y *= this.damping;
-        console.log(this.vel.y);
+        // console.log(this.vel.y);
         this.pos.add(dampVel);
         this.acc.set(0,0);
-        //this.osc.freq(300 + 600 * (1 - (this.pos.y / height)));
+        // this.osc.freq(300 + 600 * (1 - (this.pos.y / height)));
     }
 
     display() {
         if (this.id == 1) {
-          //console.log(this.status)
+          // console.log(this.status)
         }
 
         // noStroke();
