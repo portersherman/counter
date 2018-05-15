@@ -10,12 +10,12 @@ const MINPENT = "minor_pentatonic_scale";
 const PLAYER_SIZE = 20;
 
 const SCALES = {"major_pentatonic_scale" : [0, 2, 4, 7, 9],
-                "minor_pentatonic_scale"
-                 : [0, 3, 5, 7, 10]};
+                "minor_pentatonic_scale" : [0, 3, 5, 7, 10]};
 
 const BASE_PITCH = 36;
 
-const filter = new p5.LowPass(10000);
+const filter = new p5.LowPass(1000);
+const backFilter = new p5.LowPass(1000);
 
 class Player {
     constructor(x, y, c, speed) {
@@ -27,7 +27,8 @@ class Player {
         this.width = this.mass;
         this.height = this.mass;
         this.color = c;
-        this.damping = 0.8
+        this.damping = 0.8;
+        this.lastLand = Number.NEGATIVE_INFINITY;
         this.animationFrame = 0;
         this.status = WAITING;
         this.class = MAJPENT;
@@ -38,7 +39,7 @@ class Player {
     setupSound() {
         this.env = new p5.Env();
         this.env.setADSR(0.125, 0.125, 0.2, 0.5);
-        this.env.setRange(0.4, 0);
+        this.env.setRange(0.3, 0);
 
         this.osc = new p5.Oscillator();
         this.osc.setType('sawtooth');
@@ -89,9 +90,10 @@ class Player {
         this.color = color;
     }
 
-    static setFilterFreq(frequency) {
+    static setFilterFreq(frequency1, frequency2) {
         // console.log("change filter");
-        filter.freq(frequency);
+        filter.freq(frequency1);
+        backFilter.freq(frequency2);
     }
 
     restart() {
@@ -105,6 +107,10 @@ class Player {
 
     getAcc() {
         return this.acc;
+    }
+
+    getLastLand() {
+        return this.lastLand;
     }
 
     applyForce(f) {
@@ -124,9 +130,11 @@ class Player {
 
     makeTrail() {
         var vel = this.vel.copy();
-        vel.y *= -1;
-        vel.y -= (random() - 0.5);
-        this.trail.pushParticles(4, this.pos.x, this.pos.y, vel, false);
+        vel.y *= 0;
+        vel.y -= (Math.random()*1.5);
+        if (frameCount % 2 == 0) {
+            this.trail.pushParticles(4, this.pos.x - this.mass/2, this.pos.y, vel, false);
+        }
     }
 
     drawTrail() {
@@ -269,6 +277,7 @@ class Player {
     land(platform) {
         this.setAnimationState(LANDING);
         this.animationFrame = 0;
+        this.lastLand = frameCount;
         var freq = this.calculateFrequency(platform.pos.y);
         this.noteOn(freq);
     }
@@ -299,7 +308,6 @@ class Player {
             // bottom
             this.pos.add(createVector(0, (height/this.constructor.latestId)*this.id - (this.pos.y + this.mass/2)));
             this.vel.y *= -bounce;
-            deathSound.play();
             this.trail.deathExplosion(this.pos);
             this.restart();
         } else if (this.pos.y - this.mass/2 <= (height/this.constructor.latestId)*(this.id - 1)) {

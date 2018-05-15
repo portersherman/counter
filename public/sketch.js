@@ -7,15 +7,18 @@ var background;
 var currentColors = [];
 var platforms = [];
 var leftBuffer;
+var oldLastLand;
 
 const DEV_OUTPUT = false;
 
 const PLATFORM_HEIGHT = 20;
+const LENGTHS = [100, 200, 400];
 const PLATFORM_WIDTH = 400;
 const PLATFORM_WIDTH_VARIANCE = 100;
 const PLATFORM_MARGIN = 100;
 const GRAVITY = 12;
-const FREQS = [1000, 5000, 1000, 200];
+const FREQS1 = [200, 250, 200, 150];
+const FREQS2 = [125, 150, 125, 100];
 var HORIZONTAL_SPEED = 6;
 var COLOR_INDEX = 0;
 var NEXT_COLOR_INDEX = 0;
@@ -82,8 +85,7 @@ function drawPlatforms() {
 
 
 function createPlatform() {
-	var numPlayers = players.length
-    var lengths = [100, 200];
+	var numPlayers = players.length;
 
 	players.forEach((pi) => {
 		var playerId = pi.getId();
@@ -91,8 +93,8 @@ function createPlatform() {
         var firstPush = false;
 
 		if (!platforms[playerId - 1]["bottom"][platforms[playerId - 1]["bottom"].length - 1] || !platforms[playerId - 1]["top"][platforms[playerId - 1]["top"].length - 1]) {
-			platforms[playerId - 1]["bottom"].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1) + (height / (4 * numPlayers)), lengths[Math.round(Math.random())], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
-            platforms[playerId - 1]["top"].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1) - (height / (4 * numPlayers)), lengths[Math.round(Math.random())], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
+			platforms[playerId - 1]["bottom"].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1) + (height / (4 * numPlayers)), LENGTHS[Math.floor(Math.random()*LENGTHS.length)], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
+            platforms[playerId - 1]["top"].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1) - (height / (4 * numPlayers)), LENGTHS[Math.floor(Math.random()*LENGTHS.length)], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
             return;
 		}
         recent = platforms[playerId - 1]["bottom"][platforms[playerId - 1]["bottom"].length - 1];
@@ -110,7 +112,7 @@ function createPlatform() {
                 }
             }
 			var newY = recent.getSurface() + delta;
-			platforms[playerId - 1]["bottom"].push(new Platform(width + averagePlayerPos(players), newY, lengths[Math.round(Math.random())], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
+			platforms[playerId - 1]["bottom"].push(new Platform(width + averagePlayerPos(players), newY, LENGTHS[Math.floor(Math.random()*LENGTHS.length)], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
         }
         recent = platforms[playerId - 1]["top"][platforms[playerId - 1]["top"].length - 1];
         if (frameCount > recent.getTimeCreated() + recent.getDelay()) {
@@ -126,7 +128,7 @@ function createPlatform() {
                 }
             }
 			var newY = recent.getSurface() + delta;
-			platforms[playerId - 1]["top"].push(new Platform(width + averagePlayerPos(players), newY, lengths[Math.round(Math.random())], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
+			platforms[playerId - 1]["top"].push(new Platform(width + averagePlayerPos(players), newY, LENGTHS[Math.floor(Math.random()*LENGTHS.length)], PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
 		}
 	})
 }
@@ -300,12 +302,13 @@ function getColor(player) {
 }
 
 function lerpFreq() {
-    var delta = FREQS[NEXT_COLOR_INDEX] - FREQS[COLOR_INDEX];
-    return FREQS[COLOR_INDEX] + delta * lerpFactor;
+    var delta1 = FREQS1[NEXT_COLOR_INDEX] - FREQS1[COLOR_INDEX];
+    var delta2 = FREQS2[NEXT_COLOR_INDEX] - FREQS2[COLOR_INDEX];
+    return [FREQS1[COLOR_INDEX] + delta1 * lerpFactor, FREQS2[COLOR_INDEX] + delta2 * lerpFactor];
 }
 
 function changeFilter() {
-    Player.setFilterFreq(lerpFreq());
+    Player.setFilterFreq(lerpFreq()[0], lerpFreq()[1]);
 }
 
 function keyReleased() {
@@ -331,6 +334,13 @@ function initPlatforms() {
 
 function initBackground() {
     background = new Background();
+}
+
+function updateBackground() {
+    if (oldLastLand != players[0].getLastLand() && Math.abs(players[0].getLastLand() - players[1].getLastLand()) < 5) {
+        oldLastLand = players[0].getLastLand();
+        background.update();
+    }
 }
 
 function setup() {
@@ -361,9 +371,9 @@ function advance() {
 
 function draw() {
     lerpUpdateFunction();
+    updateBackground();
     cullPlatforms();
 	drawBackground();
-    // drawScores();
 	applyGravity();
 	createPlatform();
 	push();
