@@ -320,7 +320,7 @@ class Player {
             // bottom
             this.pos.add(createVector(0, (height/this.constructor.latestId)*this.id - (this.pos.y + this.mass/2)));
             this.vel.y *= -bounce;
-            this.trail.deathExplosion(this.pos);
+            this.trail.deathExplosion(this.pos, this.displayParticles);
             this.restart();
         } else if (this.pos.y - this.mass/2 <= (height/this.constructor.latestId)*(this.id - 1)) {
             // top (don't bounce off the top, hide)
