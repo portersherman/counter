@@ -55,16 +55,17 @@ class ParticleSystem {
         }
     }
 
-    deathExplosion(pos) {
-        var theta;
-        var r;
-        var vel;
-        for (var i = 0; i < 60; i++) {
-            theta = -(random() * Math.PI)
-            r = random() * 10;
-            vel = createVector(r * Math.cos(theta), r * Math.sin(theta))
-            this.particles.push(new Particle(pos.x, pos.y, vel, 60, true));
-
+    deathExplosion(pos, display) {
+        if (display) {
+            var theta;
+            var r;
+            var vel;
+            for (var i = 0; i < 60; i++) {
+                theta = -(random() * Math.PI)
+                r = random() * 10;
+                vel = createVector(r * Math.cos(theta), r * Math.sin(theta))
+                this.particles.push(new Particle(pos.x, pos.y, vel, 60, true));
+            }
         }
 
     }
