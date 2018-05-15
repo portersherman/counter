@@ -128,14 +128,15 @@ function createPlatform() {
 
 function cullPlatforms() {
     platforms.forEach((platGroup) => {
-        for (let i = 0; i < platGroup.length; i++) {
-            if (platGroup["top"][i].getRightSurface() < averagePlayerPos(players) - leftBuffer) {
-                platGroup["top"].splice(i, 1);
-            }
-            if (platGroup["bottom"][i].getRightSurface() < averagePlayerPos(players) - leftBuffer) {
-                platGroup["bottom"].splice(i, 1);
-            }
-        }
+        Object.keys(platGroup).forEach((k) => {
+            var index = 0;
+            platGroup[k].forEach((platform) => {
+                if (platform.getRightSurface() < averagePlayerPos(players) - leftBuffer) {
+                    platGroup[k].splice(index, 1);
+                }
+                index++;
+            });
+        });
     });
 }
 
