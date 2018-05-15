@@ -52,6 +52,7 @@ body {
 }
 
 h1,
+h2,
 p,
 h6 {
     text-align: center;
@@ -62,10 +63,18 @@ h6 {
 h1 {
     font-weight: 200;
     font-size: 64px;
+    margin-bottom: 0;
 }
+
+h2 {
+    font-weight: 200;
+    font-size: 48px;
+    margin-bottom: 0;
+}
+
 h6 {
     font-weight: 200;
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .name-container {
@@ -80,6 +89,7 @@ h6 {
     font-weight: 200;
     font-size: 24px;
     padding:15px;
+    margin-bottom: 15px;
 }
 
 
@@ -93,7 +103,8 @@ h6 {
 }
 
 .flexbox-item {
-  max-width: 60%;
+  max-width: 50%;
+  margin:auto;
 }
 
 .fixed {
@@ -110,18 +121,8 @@ h6 {
     text-align: justify;
 }
 
-
-.parallax {
-    /* The image used */
-
-    /* Full height */
-    height: 100%;
-
-    /* Create the parallax scrolling effect */
-    background-attachment: fixed;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+.description {
+  margin-top: 15px;
 }
 
 .scroll {
@@ -129,6 +130,7 @@ h6 {
     font-size: 36px;
     font-weight: 200px;
     padding-top: 50px;
+    cursor:pointer;
 }
 
 .chevron::before {
@@ -233,4 +235,19 @@ a.btn {
               background-color 0.3s ease-in,
               border-color 0.3s ease-in;
               color 0.3s ease-in,
+}
+
+#overlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    background-color: #fff;
+    transition: opacity 5s, visibility 0s 0.5s;
+    z-index: 2;
 }
