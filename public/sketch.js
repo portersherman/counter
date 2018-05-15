@@ -16,7 +16,6 @@ const GRAVITY = 12;
 var HORIZONTAL_SPEED = 6;
 var COLOR_INDEX = 0;
 
-
 function devLog(...args) {
     if (DEV_OUTPUT) {
         args.forEach((a) => console.log(a));
@@ -78,7 +77,7 @@ function createPlatform(playerId, numPlayers) {
 		var playerId = pi.getId();
 		var recent = platforms[playerId - 1][platforms[playerId - 1].length - 1];
 		if (!recent) {
-			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1), 80, PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
+			platforms[playerId - 1].push(new Platform(width + averagePlayerPos(players), (height / (2 * numPlayers)) * (playerId * 2 - 1), 200, PLATFORM_HEIGHT, getColor(playerId), pi.getVel().x));
 		} else if (frameCount > recent.getTimeCreated() + recent.getRandDelay()) {
             var delta;
             if (recent.getSurface() > (height / numPlayers) * (playerId) - 2 * PLATFORM_HEIGHT) {
