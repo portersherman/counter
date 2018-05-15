@@ -187,6 +187,11 @@ class Player {
         this.color = color;
     }
 
+    static setFilterFreq(frequency) {
+        // console.log("change filter");
+        filter.freq(frequency);
+    }
+
     restart() {
         this.pos.y = (height/this.constructor.latestId)*(this.id - 1) + 50;
         this.setAnimationState(WAITING);

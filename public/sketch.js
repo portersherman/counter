@@ -14,11 +14,12 @@ const PLATFORM_WIDTH = 400;
 const PLATFORM_WIDTH_VARIANCE = 100;
 const PLATFORM_MARGIN = 100;
 const GRAVITY = 12;
+const FREQS = [1000, 5000, 1000, 200];
 var HORIZONTAL_SPEED = 6;
 var COLOR_INDEX = 0;
 var NEXT_COLOR_INDEX = 0;
 
-var colorLerpFactor = 0.0;
+var lerpFactor = 0.0;
 
 function devLog(...args) {
     if (DEV_OUTPUT) {
@@ -234,18 +235,16 @@ function keyPressed() {
 }
 
 function decColor() {
-    if (colorLerpFactor >= 1.0) {
-        colorLerpFactor = 0.0;
+    if (lerpFactor >= 1.0) {
+        lerpFactor = 0.0;
         NEXT_COLOR_INDEX = (COLOR_INDEX - 1 + colors.length/2) % (colors.length/2);
-        console.log(NEXT_COLOR_INDEX);
     }
 }
 
 function incColor() {
-    if (colorLerpFactor >= 1.0) {
-        colorLerpFactor = 0.0;
+    if (lerpFactor >= 1.0) {
+        lerpFactor = 0.0;
         NEXT_COLOR_INDEX = (COLOR_INDEX + 1 + colors.length/2) % (colors.length/2);
-        console.log(NEXT_COLOR_INDEX);
     }
 }
 
@@ -264,13 +263,13 @@ function changeColors() {
     });
 }
 
-function tomsDnakUpdateFunction() {
-    if (colorLerpFactor < 1.0) {
-        changeColors()
-        colorLerpFactor += 0.01;
+function lerpUpdateFunction() {
+    if (lerpFactor < 1.0) {
+        changeColors();
+        changeFilter();
+        lerpFactor += 0.01;
     } else {
         COLOR_INDEX = NEXT_COLOR_INDEX;
-        //colorLerpFactor = 0.0;
     }
 }
 
@@ -278,20 +277,29 @@ function getColor(player) {
     if (player == 1) {
         var from = colors[COLOR_INDEX * 2 + 1];
         var to = colors[NEXT_COLOR_INDEX * 2 +1]
-        var lerpedColor = lerpColor(from, to, colorLerpFactor);
+        var lerpedColor = lerpColor(from, to, lerpFactor);
         return lerpedColor
 
         //return colors[COLOR_INDEX * 2 + 1];
     } else if (player == 2) {
         var from = colors[COLOR_INDEX * 2];
         var to = colors[NEXT_COLOR_INDEX * 2]
-        var lerpedColor = lerpColor(from, to, colorLerpFactor);
+        var lerpedColor = lerpColor(from, to, lerpFactor);
         return lerpedColor
 
         //return colors[COLOR_INDEX * 2];
     } else {
         return null;
     }
+}
+
+function lerpFreq() {
+    var delta = FREQS[NEXT_COLOR_INDEX] - FREQS[COLOR_INDEX];
+    return FREQS[COLOR_INDEX] + delta * lerpFactor;
+}
+
+function changeFilter() {
+    Player.setFilterFreq(lerpFreq());
 }
 
 function keyReleased() {
@@ -341,7 +349,7 @@ function advance() {
 }
 
 function draw() {
-    tomsDnakUpdateFunction();
+    lerpUpdateFunction();
     cullPlatforms();
 	drawBackground();
     // drawScores();
