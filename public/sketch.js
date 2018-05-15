@@ -26,10 +26,6 @@ var NEXT_COLOR_INDEX = 0;
 
 var lerpFactor = 0.0;
 
-function preload() {
-    deathSound = loadSound('sound/aesthetic.mp3');
-}
-
 function devLog(...args) {
     if (DEV_OUTPUT) {
         args.forEach((a) => console.log(a));
