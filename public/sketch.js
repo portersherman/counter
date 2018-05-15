@@ -318,7 +318,7 @@ function keyReleased() {
 }
 
 function initPlatforms() {
-    leftBuffer = width/5;
+    leftBuffer = height/4;
 	for (var i = 0; i < players.length; i++) {
         platforms.push({"top" : [], "bottom" : []});
 	}

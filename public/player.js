@@ -193,7 +193,7 @@ class Player {
     }
 
     restart() {
-        this.pos.y = (height/this.constructor.latestId)*(this.id - 1) + 50;
+        this.pos.y = (height / this.constructor.latestId) * (this.id - 1) + height / (2 * this.constructor.latestId);
         this.setAnimationState(WAITING);
     }
 
