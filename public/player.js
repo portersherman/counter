@@ -183,6 +183,10 @@ class Player {
         return this.latestId;
     }
 
+    changeColor(color) {
+        this.color = color;
+    }
+
     restart() {
         this.pos.y = (height/this.constructor.latestId)*(this.id - 1) + 50;
         this.setAnimationState(WAITING);
@@ -225,7 +229,7 @@ class Player {
 
     display() {
         if (this.id == 1) {
-          //console.log(this.status)
+          // console.log(this.status)
         }
 
         // noStroke();

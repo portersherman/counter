@@ -17,6 +17,10 @@ class Platform {
         else this.latestId++;
         return this.latestId;
     }
+	
+	changeColor(color) {
+        this.color = color;
+    }
 
 	setActivated() {
 		this.activated = true;
