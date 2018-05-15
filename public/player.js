@@ -17,6 +17,104 @@ const BASE_PITCH = 36;
 
 const filter = new p5.LowPass(10000);
 
+class Particle {
+    constructor(x, y, vel, ttl, isDeathExplosionParticle) {
+        this.pos = createVector(x, y);
+        this.pos.x += (random() - 0.5) * PLAYER_SIZE;
+        // this.pos.x -= PLAYER_SIZE;
+        this.vel = vel;
+        this.damping = 0.8;
+
+        this.isDeathExplosionParticle = isDeathExplosionParticle;
+
+        this.ttl = ttl + (random() - 0.5 ) * 20;
+
+
+
+    }
+
+    update(dampY) {
+        this.pos.add(this.vel);
+
+        this.vel.x *= this.damping;
+        if (dampY || this.isDeathExplosionParticle) {
+            this.vel.y *= this.damping;
+        }
+        this.ttl -= 1;
+    }
+
+    display() {
+        push();
+        if (this.isDeathExplosionParticle) {
+            strokeWeight(0.5);
+        } else {
+            strokeWeight(0.1);
+        }
+        rect(this.pos.x, this.pos.y, 5, 5);
+        pop();
+    }
+
+    isAlive() {
+        return (this.ttl > 0);
+    }
+
+
+}
+
+class ParticleSystem {
+    constructor(numParticles, x, y, ttl) {
+        this.particles = [];
+        this.basePos = createVector(x, y);
+        this.baseVel = createVector(0, 0);
+        this.ttl = ttl;
+    }
+
+    getNumParticles() {
+        return this.particles.length
+    }
+
+    pushParticles(num, x, y, vel, isDying) {
+        for (var i = 0; i < num; i++) {
+            this.particles.push(new Particle(x-PLAYER_SIZE/2, y, vel, this.ttl, isDying))
+        }
+    }
+
+    deathExplosion(pos) {
+        var theta;
+        var r;
+        var vel;
+        for (var i = 0; i < 60; i++) {
+            theta = -(random() * Math.PI)
+            r = random() * 30;
+            vel = createVector(r * Math.cos(theta), r * Math.sin(theta))
+            this.particles.push(new Particle(pos.x, pos.y, vel, 60, true));
+
+        }
+
+    }
+
+    update() {
+        var len = this.getNumParticles();
+        for (var i = len-1; i >=0; i--) {
+            var particle = this.particles[i];
+            particle.update();
+            particle.display();
+            if ((!particle.isAlive()) ||
+                (particle.isDeathExplosionParticle && particle.vel.magSq() < 0.5)
+            ) {
+                this.particles.splice(i,1);
+            }
+        }
+    }
+
+    display(dampY) {
+        this.particles.forEach((p) => {
+            p.update(dampY);
+            p.display();
+        })
+    }
+}
+
 class Player {
     constructor(x, y, c, speed) {
         this.id = Player.incrementId();
@@ -32,6 +130,7 @@ class Player {
         this.status = WAITING;
         this.class = MAJPENT;
         this.setupSound();
+        this.trail = new ParticleSystem(5, this.pos.x, this.pos.y, 40);
     }
 
     setupSound() {
@@ -108,10 +207,20 @@ class Player {
         }
         dampVel = this.vel.copy();
         dampVel.y *= this.damping;
-        console.log(this.vel.y);
         this.pos.add(dampVel);
         this.acc.set(0,0);
-        //this.osc.freq(300 + 600 * (1 - (this.pos.y / height)));
+    }
+
+    makeTrail() {
+        var vel = this.vel.copy();
+        vel.y *= -1;
+        vel.y -= (random() - 0.5);
+        this.trail.pushParticles(4, this.pos.x, this.pos.y, vel, false);
+    }
+
+    drawTrail() {
+        this.trail.update();
+        this.trail.display(this.canLand());
     }
 
     display() {
@@ -132,7 +241,7 @@ class Player {
         if (this.isFloating()) {
             translate(this.pos.x, this.pos.y);
             rotate(this.animationFrame / 10);
-            scale(1 + clamp(Math.abs(jumpVel) - Math.abs(this.vel.y), Math.abs(jumpVel), 0) / 10);
+            scale(1 + clamp(Math.abs(jumpVel) - Math.abs(this.vel.y), Math.abs(jumpVel), 0) / 40);
             translate(-this.pos.x, -this.pos.y);
         }
 
@@ -147,6 +256,7 @@ class Player {
                 } else {
                     this.setAnimationState(RUNNING);
                 }
+                this.makeTrail();
                 break;
             case WAITING:
                 if ((frameCount % 60) < 30) {
@@ -161,6 +271,7 @@ class Player {
                 break;
             case RUNNING:
                 rect(this.pos.x, this.pos.y - this.mass/2, this.mass, this.mass);
+                this.makeTrail();
                 break;
             case FALLING:
                 rect(this.pos.x, this.pos.y - this.mass/2, this.mass, this.mass);
@@ -169,8 +280,10 @@ class Player {
                 rect(this.pos.x, this.pos.y, this.mass, this.mass);
                 break;
         }
-
         pop();
+
+        this.drawTrail();
+
         if (this.isFloating()) {
             this.animationFrame++;
         }
@@ -275,6 +388,7 @@ class Player {
             // bottom
             this.pos.add(createVector(0, (height/this.constructor.latestId)*this.id - (this.pos.y + this.mass/2)));
             this.vel.y *= -bounce;
+            this.trail.deathExplosion(this.pos);
             this.restart();
         } else if (this.pos.y - this.mass/2 <= (height/this.constructor.latestId)*(this.id - 1)) {
             // top (don't bounce off the top, hide)

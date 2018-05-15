@@ -166,7 +166,7 @@ function applyGravity() {
 
 var jumpForce = -300;
 var jumpVel = -14.4
-var fallForce = 60;
+var fallForce = 100;
 
 function keyPressed() {
 	if (players[0].canJump()) {
@@ -201,19 +201,19 @@ function keyPressed() {
     }
 }
 
-// function keyReleased() {
-//     if (players[0].isFloating() && players[0].vel.y < -3) {
-//         if (key == "W") {
-//             players[0].applyForce(createVector(0, fallForce));
-//         }
-//     }
-//     if (players[1].isFloating() && players[1].vel.y < -3) {
-//         if (keyCode == UP_ARROW) {
-//             players[1].applyForce(createVector(0, fallForce));
-//         }
-//     }
-//     return false;
-// }
+function keyReleased() {
+    if (players[0].isFloating() && players[0].vel.y < -3) {
+        if (key == "W") {
+            players[0].applyForce(createVector(0, fallForce));
+        }
+    }
+    if (players[1].isFloating() && players[1].vel.y < -3) {
+        if (keyCode == UP_ARROW) {
+            players[1].applyForce(createVector(0, fallForce));
+        }
+    }
+    return false;
+}
 
 function initPlatforms() {
     leftBuffer = width/5;
