@@ -167,7 +167,7 @@ function applyGravity() {
 
 var jumpForce = -300;
 var jumpVel = -14.4
-var fallForce = 60;
+var fallForce = 100;
 
 function keyPressed() {
 	if (players[0].canJump()) {
