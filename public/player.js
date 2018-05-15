@@ -28,9 +28,6 @@ class Particle {
         this.isDeathExplosionParticle = isDeathExplosionParticle;
 
         this.ttl = ttl + (random() - 0.5 ) * 20;
-
-
-
     }
 
     update(dampY) {
@@ -45,12 +42,15 @@ class Particle {
 
     display() {
         push();
+        var size;
         if (this.isDeathExplosionParticle) {
-            strokeWeight(0.5);
+            noStroke();
+            size = (Math.random() - 0.5) * 10 + 10;
         } else {
-            strokeWeight(0.1);
+            noStroke();
+            size = (Math.random() - 0.5) * 5 + 10;
         }
-        rect(this.pos.x, this.pos.y, 5, 5);
+        rect(this.pos.x, this.pos.y, size, size);
         pop();
     }
 
@@ -100,7 +100,7 @@ class ParticleSystem {
             particle.update();
             particle.display();
             if ((!particle.isAlive()) ||
-                (particle.isDeathExplosionParticle && particle.vel.magSq() < 0.5)
+                (particle.isDeathExplosionParticle && particle.vel.magSq() < 0.125)
             ) {
                 this.particles.splice(i,1);
             }
@@ -183,7 +183,7 @@ class Player {
         return this.latestId;
     }
 
-    changeColor(color) {
+    setColor(color) {
         this.color = color;
     }
 
@@ -234,9 +234,9 @@ class Player {
 
         // noStroke();
         // fill(this.color);
-        stroke(this.color);
-        strokeWeight(3);
-        noFill();
+        // stroke(this.color);
+        // strokeWeight(3);
+        fill(this.color);
         rectMode(CENTER);
 
         // push state to drawer
@@ -362,7 +362,6 @@ class Player {
     land(platform) {
         this.setAnimationState(LANDING);
         this.animationFrame = 0;
-        platform.setActivated();
         var freq = this.calculateFrequency(platform.pos.y);
         this.noteOn(freq);
     }
@@ -411,6 +410,7 @@ class Player {
                     if ((this.pos.x - this.mass/2 < platform.getPos().x + platform.getWidth()) && (this.pos.x + this.mass/2 > platform.getPos().x)) {
                         if (this.vel.y > 0) {
                             landed = true;
+                            platform.setActivated();
                             this.pos.add(createVector(0, platform.getSurface() - (this.pos.y)));
                             this.vel.y *= 0;
                             if (this.canLand()) {
@@ -433,8 +433,9 @@ class Player {
         y = laneHeight - y;
 
         var steps = Math.floor(laneHeight / PLATFORM_HEIGHT);
-        var note = Math.ceil(y / laneHeight * steps);
+        var note = (y / laneHeight * steps);
         // console.log(note);
+        note = Math.round(note);
 
         // Base note + Octave + Degree
         var pitch = BASE_PITCH + (Math.floor(note / SCALES[this.class].length) * 12) + (SCALES[this.class][note % SCALES[this.class].length]);

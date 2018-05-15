@@ -17,8 +17,8 @@ class Platform {
         else this.latestId++;
         return this.latestId;
     }
-	
-	changeColor(color) {
+
+	setColor(color) {
         this.color = color;
     }
 
@@ -58,16 +58,17 @@ class Platform {
 		// fill(this.color);
 		// stroke(255);
 		// strokeWeight(3);
-		noStroke();
-		fill(this.color);
+		stroke(this.color);
+		strokeWeight(3);
+		noFill();
 		rectMode(CORNER);
 		rect(this.pos.x, this.pos.y, this.width, this.height);
 
-		if (!this.activated) {
+		if (this.activated) {
 			noStroke()
-			fill(getComplement(this.color));
+			fill(this.color);
 			rectMode(CORNER);
-			rect(this.pos.x + 3, this.pos.y + 3, this.width - 6, this.height - 6);
+			rect(this.pos.x, this.pos.y, this.width, this.height);
 		}
 	}
 }
