@@ -3,6 +3,7 @@ const X_AXIS = 2
 
 var players = [];
 var colors = [];
+var background;
 var currentColors = [];
 var platforms = [];
 var leftBuffer;
@@ -288,6 +289,10 @@ function initPlatforms() {
 	}
 }
 
+function initBackground() {
+    background = new Background();
+}
+
 function setup() {
 	frameRate(60);
     createColors();
@@ -295,6 +300,7 @@ function setup() {
     drawBackground();
     initPlayers();
     initPlatforms();
+    initBackground();
     createPlatform();
 }
 
