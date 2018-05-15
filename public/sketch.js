@@ -20,6 +20,10 @@ var NEXT_COLOR_INDEX = 0;
 
 var colorLerpFactor = 0.0;
 
+function preload() {
+    deathSound = loadSound('sound/aesthetic.mp3');
+}
+
 function devLog(...args) {
     if (DEV_OUTPUT) {
         args.forEach((a) => console.log(a));
@@ -37,12 +41,12 @@ function getComplement(color) {
 }
 
 function initPlayers() {
-  	players[0] = new Player(200, 0, getComplement(colors[0]), HORIZONTAL_SPEED);
+  	players[0] = new Player(200, 0, getComplement(colors[0]), HORIZONTAL_SPEED, deathSound);
     temprgb=colors[1];
 	temphsv=RGB2HSV(temprgb);
 	temphsv.hue=HueShift(temphsv.hue, 180.0);
     temprgb=HSV2RGB(temphsv);
-  	players[1] = new Player(200, 0, getComplement(colors[1]), HORIZONTAL_SPEED);
+  	players[1] = new Player(200, 0, getComplement(colors[1]), HORIZONTAL_SPEED, deathSound);
     players.forEach((pi) => {
         pi.restart();
     });
