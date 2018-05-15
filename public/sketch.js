@@ -8,6 +8,7 @@ var currentColors = [];
 var platforms = [];
 var leftBuffer;
 var oldLastLand;
+var starting = false;
 
 const DEV_OUTPUT = false;
 
@@ -275,7 +276,7 @@ function lerpUpdateFunction() {
     if (lerpFactor < 1.0) {
         changeColors();
         changeFilter();
-        lerpFactor += 0.01;
+        lerpFactor += 0.005;
     } else {
         COLOR_INDEX = NEXT_COLOR_INDEX;
     }
@@ -283,14 +284,14 @@ function lerpUpdateFunction() {
 
 function getColor(player) {
     if (player == 1) {
-        var from = colors[COLOR_INDEX * 2 + 1];
+        var from = (!starting) ? colors[COLOR_INDEX * 2 + 1] : color(255);
         var to = colors[NEXT_COLOR_INDEX * 2 +1]
         var lerpedColor = lerpColor(from, to, lerpFactor);
         return lerpedColor
 
         //return colors[COLOR_INDEX * 2 + 1];
     } else if (player == 2) {
-        var from = colors[COLOR_INDEX * 2];
+        var from = (!starting) ? colors[COLOR_INDEX * 2] : color(255);
         var to = colors[NEXT_COLOR_INDEX * 2]
         var lerpedColor = lerpColor(from, to, lerpFactor);
         return lerpedColor
@@ -370,6 +371,11 @@ function advance() {
 }
 
 function draw() {
+    if (frameCount < 300) {
+        starting = true;
+    } else {
+        starting = false;
+    }
     lerpUpdateFunction();
     updateBackground();
     cullPlatforms();
@@ -381,6 +387,4 @@ function draw() {
     drawPlayers();
     drawPlatforms();
     pop();
-
-
 }
