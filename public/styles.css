@@ -60,7 +60,7 @@ h6 {
 }
 
 h1 {
-    font-weight: 400;
+    font-weight: 200;
     font-size: 64px;
 }
 h6 {
@@ -77,17 +77,9 @@ h6 {
 .porter,
 .tom {
     mix-blend-mode: difference;
-    font-weight: 400;
+    font-weight: 200;
     font-size: 24px;
-}
-
-.porter {
-    justify-content: center;
-    flex: 0 0 50%;
-}
-
-.tom {
-  flex: 1;
+    padding:15px;
 }
 
 
