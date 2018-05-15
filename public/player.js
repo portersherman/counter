@@ -231,7 +231,7 @@ class Player {
         // noStroke();
         // fill(this.color);
         stroke(this.color);
-        strokeWeight(4);
+        strokeWeight(3);
         noFill();
         rectMode(CENTER);
 
@@ -262,7 +262,7 @@ class Player {
                 if ((frameCount % 60) < 30) {
                     noFill()
                     stroke(this.color);
-                    strokeWeight(4);
+                    strokeWeight(3);
                 } else {
                     fill(this.color);
                     noStroke();
@@ -358,6 +358,7 @@ class Player {
     land(platform) {
         this.setAnimationState(LANDING);
         this.animationFrame = 0;
+        platform.setActivated();
         var freq = this.calculateFrequency(platform.pos.y);
         this.noteOn(freq);
     }
