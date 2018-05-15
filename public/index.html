@@ -3,17 +3,45 @@
   <head>
     <title>CounterPointless</title>
     <meta name="viewport" width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0>
-    <style> body {padding: 0; margin: 0;} </style>
-    <script src="./lib/p5.min.js"></script>
-    <script src="./lib/color.js"></script>
-    <script src="./addons/p5.dom.min.js"></script>
-    <script src="./addons/p5.sound.min.js"></script>
-    <script src="player.js"></script>
-    <script src="platform.js"></script>
-    <script src="particles.js"></script>
-    <script src="background.js"></script>
-    <script src="sketch.js"></script>
+    <link rel="stylesheet" href="styles.css">
+  </head>
   </head>
   <body>
+    <div class="flexbox-container">
+      <div class="flexbox-item fixed">
+        <div class="title-box">
+            <h1>Counter Pointless</h1>
+            <div class="name-container">
+              <p class="porter">Porter Sherman</h3>
+              <p class="tom">Tom Robbins</h3>
+            </div>
+            <h6 class=justified>
+              We seek to connect the world through shared understanding of sonic and visual experiences; using collaboration and technology to advance the human race.
+            </h6>
+            <p class="scroll"><span class="chevron bottom"></span></p>
+        </div>
+      </div>
+    </div>
+    <div class="flexbox-container">
+      <div class="flexbox-item fixed">
+        <div class="title-box">
+            <h1>How to Play</h1>
+            <h6 class=justified>
+              Grab a friend and write a song together!  The game is a cooperative compositional endeavor.
+              Controls: W or UP to jump, A/D or LEFT/RIGHT to control the timbre of the sound.  The music in the background will react to your playing, and hopefully your partner will too!
+            </h6>
+            <div class="btn-container">
+              <a
+                class="btn ghost-button-semi-transparent"
+                href="/sketch.html"
+              >
+                PLAY
+              </a>
+            </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
+
+
