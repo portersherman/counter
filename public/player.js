@@ -38,12 +38,13 @@ class Player {
         this.trail = new ParticleSystem(5, this.pos.x, this.pos.y, 40);
         this.displayParticles = false;
         this.jumps = 0;
+        this.inBounds = true;
     }
 
 
     setupSound() {
         this.env = new p5.Env();
-        this.env.setADSR(0.25, 0.125, 0.2, 0.75);
+        this.env.setADSR(0.25, 0.125, 0.2, 0.5);
         this.env.setRange(0.3, 0);
 
         this.osc = new p5.Oscillator();
@@ -161,57 +162,59 @@ class Player {
     }
 
     display() {
-        fill(this.color);
-        rectMode(CENTER);
+            if (this.inBounds) {
+            fill(this.color);
+            rectMode(CENTER);
 
-        // push state to drawer
-        push();
+            // push state to drawer
+            push();
 
-        if (this.isFloating()) {
-            translate(this.pos.x, this.pos.y);
-            rotate(this.animationFrame / 10);
-            scale(1 + clamp(Math.abs(jumpVel) - Math.abs(this.vel.y), Math.abs(jumpVel), 0) / 40);
-            translate(-this.pos.x, -this.pos.y);
+            if (this.isFloating()) {
+                translate(this.pos.x, this.pos.y);
+                rotate(this.animationFrame / 10);
+                scale(1 + clamp(Math.abs(jumpVel) - Math.abs(this.vel.y), Math.abs(jumpVel), 0) / 40);
+                translate(-this.pos.x, -this.pos.y);
+            }
+
+            var landingLength = 10;
+            switch(this.status) {
+                case LANDING:
+                    var shorterHalf = (this.mass/2 * (this.animationFrame/(landingLength)));
+                    this.height = this.mass/2 + shorterHalf;
+                    rect(this.pos.x, this.pos.y - this.mass/2 + (this.mass/2 - shorterHalf)/2, this.mass, this.mass/2 + shorterHalf);
+                    if (this.animationFrame < landingLength) {
+                        this.animationFrame++;
+                    } else {
+                        this.setAnimationState(RUNNING);
+                    }
+                    this.makeTrail();
+                    break;
+                case WAITING:
+                    if ((frameCount % 60) < 30) {
+                        noFill()
+                        stroke(this.color);
+                        strokeWeight(3);
+                    } else {
+                        fill(this.color);
+                        noStroke();
+                    }
+                    rect(this.pos.x, this.pos.y, this.mass, this.mass);
+                    break;
+                case RUNNING:
+                    rect(this.pos.x, this.pos.y - this.mass/2, this.mass, this.mass);
+                    this.makeTrail();
+                    break;
+                case FALLING:
+                    rect(this.pos.x, this.pos.y - this.mass/2, this.mass, this.mass);
+                    break;
+                default:
+                    rect(this.pos.x, this.pos.y, this.mass, this.mass);
+                    break;
+            }
+            pop();
+
+            this.drawTrail();
         }
-
-        var landingLength = 10;
-        switch(this.status) {
-            case LANDING:
-                var shorterHalf = (this.mass/2 * (this.animationFrame/(landingLength)));
-                this.height = this.mass/2 + shorterHalf;
-                rect(this.pos.x, this.pos.y - this.mass/2 + (this.mass/2 - shorterHalf)/2, this.mass, this.mass/2 + shorterHalf);
-                if (this.animationFrame < landingLength) {
-                    this.animationFrame++;
-                } else {
-                    this.setAnimationState(RUNNING);
-                }
-                this.makeTrail();
-                break;
-            case WAITING:
-                if ((frameCount % 60) < 30) {
-                    noFill()
-                    stroke(this.color);
-                    strokeWeight(3);
-                } else {
-                    fill(this.color);
-                    noStroke();
-                }
-                rect(this.pos.x, this.pos.y, this.mass, this.mass);
-                break;
-            case RUNNING:
-                rect(this.pos.x, this.pos.y - this.mass/2, this.mass, this.mass);
-                this.makeTrail();
-                break;
-            case FALLING:
-                rect(this.pos.x, this.pos.y - this.mass/2, this.mass, this.mass);
-                break;
-            default:
-                rect(this.pos.x, this.pos.y, this.mass, this.mass);
-                break;
-        }
-        pop();
-
-        this.drawTrail();
 
         if (this.isFloating()) {
             this.animationFrame++;
@@ -322,10 +325,10 @@ class Player {
             this.vel.y *= -bounce;
             this.trail.deathExplosion(this.pos, this.displayParticles);
             this.restart();
-        } else if (this.pos.y - this.mass/2 <= (height/this.constructor.latestId)*(this.id - 1)) {
-            // top (don't bounce off the top, hide)
-            // this.pos.add(createVector(0, (height/this.constructor.latestId)*(this.id - 1) - (this.pos.y - this.mass/2)));
-            // this.vel.y *= -bounce;
+        } else if (this.pos.y + this.mass/2 <= (height/this.constructor.latestId)*(this.id - 1)) {
+            this.inBounds = false;
+        } else {
+            this.inBounds = true;
         }
     }
 

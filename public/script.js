@@ -1,5 +1,7 @@
 // Scroll to a certain element
-function scrollToNextPage() {
+document.querySelector(".arrow-border").addEventListener("click", scroll);
+
+function scroll() {
     document.querySelector('#second-page').scrollIntoView({
       behavior: 'smooth'
     });
