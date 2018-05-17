@@ -162,7 +162,7 @@ class Player {
     }
 
     display() {
-            if (this.inBounds) {
+        if (this.inBounds) {
             fill(this.color);
             rectMode(CENTER);
 
