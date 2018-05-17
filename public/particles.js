@@ -13,11 +13,11 @@ class Particle {
         this.ttl = ttl + (random() - 0.5 ) * 20;
     }
 
-    update(dampY) {
+    update(shouldDamp) {
         this.pos.add(this.vel);
 
         this.vel.x *= this.damping;
-        if (dampY || this.isDeathExplosionParticle) {
+        if (shouldDamp || this.isDeathExplosionParticle) {
             this.vel.y *= this.damping;
         }
         this.ttl -= 1;
@@ -70,12 +70,11 @@ class ParticleSystem {
 
     }
 
-    update() {
+    update(shouldDamp) {
         var len = this.getNumParticles();
         for (var i = len-1; i >=0; i--) {
             var particle = this.particles[i];
-            particle.update();
-            particle.display();
+            particle.update(shouldDamp);
             if ((!particle.isAlive()) ||
                 (particle.isDeathExplosionParticle && particle.vel.magSq() < 0.01)
             ) {
@@ -84,9 +83,8 @@ class ParticleSystem {
         }
     }
 
-    display(dampY) {
+    display() {
         this.particles.forEach((p) => {
-            p.update(dampY);
             p.display();
         })
     }
