@@ -162,9 +162,11 @@ class Player {
     }
 
     display() {
-            if (this.inBounds) {
-            fill(this.color);
-            rectMode(CENTER);
+
+        fill(this.color);
+        rectMode(CENTER);
+
+        if (this.inBounds) {
 
             // push state to drawer
             push();
@@ -213,8 +215,9 @@ class Player {
             }
             pop();
 
-            this.drawTrail();
         }
+
+        this.drawTrail();
 
         if (this.isFloating()) {
             this.animationFrame++;
